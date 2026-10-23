@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuickLens - 設定オプション</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card: #111827;
+      --border: #1f293d;
+      --accent: #38bdf8;
+      --accent-purple: #c084fc;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: var(--bg); color: var(--text); padding: 32px 16px; font-size: 13px; line-height: 1.6; }
+    .container { max-width: 620px; margin: 0 auto; background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+    .header { background: linear-gradient(135deg, #0284c7 0%, #4f46e5 100%); padding: 22px 24px; }
+    .header h1 { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+    .header p { font-size: 12px; color: #e0f2fe; }
+    .content { padding: 24px; }
+    .section { margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+    .section:last-child { border-bottom: none; }
+    .section-title { font-size: 13.5px; font-weight: 700; color: #fff; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+    .form-group { margin-bottom: 14px; }
+    .label { display: block; font-weight: 600; color: #e2e8f0; margin-bottom: 5px; }
+    .desc { font-size: 11.5px; color: var(--text-muted); margin-bottom: 6px; }
+    .select, .input {
+      width: 100%; max-width: 320px; padding: 8px 10px; border-radius: 6px;
+      border: 1px solid var(--border); background: #0c1220; color: #fff; font-size: 12.5px; outline: none;
+    }
+    .select:focus, .input:focus { border-color: var(--accent); }
+    .checkbox-label { display: flex; align-items: center; gap: 8px; cursor: pointer; color: #cbd5e1; font-weight: 500; }
+    .info-box { background: #0c1220; border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-size: 11.5px; color: #cbd5e1; }
+    .info-box code { color: var(--accent); background: rgba(56,189,248,0.1); padding: 1px 5px; border-radius: 4px; font-family: monospace; }
+    .footer { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; background: #0c1220; border-top: 1px solid var(--border); }
+    .save-btn { background: #0284c7; color: #fff; border: none; padding: 8px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; }
+    .save-btn:hover { background: #0369a1; }
+    .reset-btn { background: transparent; border: 1px solid var(--border); color: var(--text-muted); padding: 8px 14px; border-radius: 6px; cursor: pointer; }
+    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); background: #10b981; color: #fff; padding: 8px 18px; border-radius: 30px; font-size: 12px; font-weight: 600; opacity: 0; transition: all 0.2s ease; pointer-events: none; }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>⚡ QuickLens 設定オプション</h1>
+      <p>デフォルト翻訳言語、AIキーのセキュア保管、Gmail/GitHub等での表示動作を設定します。</p>
+    </div>
+
+    <div class="content">
+      <div class="section">
+        <h2 class="section-title">翻訳エンジン</h2>
+        <div class="form-group">
+          <label class="label">標準エンジン</label>
+          <div class="desc">デフォルトは完全無料・APIキー不要です。ご自身のキーを登録するとGeminiやOpenAIのスマート解説が利用できます。</div>
+          <select id="opt-engine" class="select">
+            <option value="free">🆓 完全無料エンジン (APIキー不要・Google gtx)</option>
+            <option value="gemini">⚡ Google Gemini AI (ユーザー登録不要・端末暗号化キー)</option>
+            <option value="openai">🧠 OpenAI GPT-4o-mini (ユーザー登録不要・端末暗号化キー)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="label">標準文体トーン</label>
+          <select id="opt-tone" class="select">
+            <option value="natural">💬 自然な日常訳 (Natural)</option>
+            <option value="business">👔 ビジネス敬語・公式文書 (Formal)</option>
+            <option value="summary">📝 箇条書き要約 (Summary)</option>
+            <option value="breakdown">🔍 翻訳 ＋ 重要単語・ニュアンス解説 (Breakdown)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title">特殊環境・表示設定 (Gmail, GitHub, SPA対応)</h2>
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="opt-all-frames" checked disabled>
+            <span>iframe内のメール本文やコード画面でも動作する (all_frames有効)</span>
+          </label>
+        </div>
+        <div class="form-group">
+          <label class="label">ページ内トースト表示時間</label>
+          <select id="opt-toast-duration" class="select">
+            <option value="5000">5 秒間</option>
+            <option value="10000">10 秒間 (標準)</option>
+            <option value="20000">20 秒間</option>
+            <option value="0">手動で閉じるまで表示</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title">セキュリティ仕様</h2>
+        <div class="info-box">
+          <p><strong>🔒 エンドツーエンド暗号化 (Web Crypto AES-GCM):</strong></p>
+          <p style="margin-top: 4px;">
+            登録したAPIキーは拡張機能の隔離領域（<code>chrome.storage.local</code>）に256ビット暗号化されて格納されます。クラウド同期や外部サーバー送信は一切行われず、公式APIへ直接リクエストを送信します。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <button id="reset-btn" class="reset-btn">初期設定に戻す</button>
+      <button id="save-btn" class="save-btn">設定を保存する</button>
+    </div>
+  </div>
+  <div id="save-toast" class="toast">✓ 設定を保存しました</div>
+  <script src="options.js"></script>
+</body>
+</html>

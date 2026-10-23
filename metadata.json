@@ -1,0 +1,6 @@
+{
+  "name": "Chrome翻訳拡張機能ジェネレーター (Quick Translator MV3)",
+  "description": "Google Chrome拡張機能（Manifest V3準拠）の選択テキスト翻訳拡張コードジェネレーターおよびライブプレビュー・ZIPダウンロード環境",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

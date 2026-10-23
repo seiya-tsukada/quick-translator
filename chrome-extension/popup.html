@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuickLens 翻訳</title>
+  <style>
+    :root {
+      --bg-canvas: #090d16;
+      --bg-surface: #111827;
+      --bg-surface-elevated: #1e293b;
+      --border-subtle: #1f293d;
+      --border-active: #38bdf8;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-cyan: #38bdf8;
+      --accent-purple: #c084fc;
+      --accent-emerald: #34d399;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    body {
+      width: 380px;
+      background-color: var(--bg-canvas);
+      color: var(--text-main);
+      font-size: 13px;
+      line-height: 1.5;
+      padding: 14px;
+      overflow-x: hidden;
+    }
+
+    /* Top HUD Header */
+    .hud-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .brand-symbol {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      background: linear-gradient(135deg, #0284c7 0%, #6366f1 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: #fff;
+      font-weight: 800;
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.35);
+    }
+
+    .brand-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: #fff;
+    }
+
+    .engine-badge-btn {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 9999px;
+      padding: 3px 9px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent-cyan);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.15s ease;
+    }
+
+    .engine-badge-btn:hover {
+      border-color: var(--accent-cyan);
+      background: var(--bg-surface-elevated);
+    }
+
+    .engine-badge-btn.ai {
+      color: var(--accent-purple);
+      border-color: rgba(192, 132, 252, 0.3);
+    }
+
+    /* Collapsible Secure Key Vault */
+    .vault-drawer {
+      display: none;
+      background: var(--bg-surface);
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 12px;
+      animation: slide-down 0.2s ease forwards;
+    }
+
+    .vault-drawer.open {
+      display: block;
+    }
+
+    @keyframes slide-down {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .vault-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent-purple);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    .vault-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.4;
+      margin-bottom: 10px;
+    }
+
+    .vault-input-group {
+      margin-bottom: 8px;
+    }
+
+    .vault-label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      color: #e2e8f0;
+      margin-bottom: 4px;
+    }
+
+    .vault-input-row {
+      display: flex;
+      gap: 6px;
+    }
+
+    .vault-input {
+      flex: 1;
+      background: var(--bg-canvas);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 6px 8px;
+      font-size: 11px;
+      color: #fff;
+      font-family: monospace;
+      outline: none;
+    }
+
+    .vault-input:focus {
+      border-color: var(--accent-purple);
+    }
+
+    .vault-btn {
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      background: #7c3aed;
+      color: #fff;
+      transition: background 0.15s ease;
+    }
+
+    .vault-btn:hover {
+      background: #6d28d9;
+    }
+
+    .vault-engine-selector {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px dashed var(--border-subtle);
+    }
+
+    .engine-chip {
+      flex: 1;
+      padding: 5px 6px;
+      border-radius: 6px;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-canvas);
+      color: var(--text-muted);
+      font-size: 10.5px;
+      font-weight: 600;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .engine-chip.active {
+      border-color: var(--accent-cyan);
+      background: rgba(56, 189, 248, 0.1);
+      color: var(--accent-cyan);
+    }
+
+    .engine-chip.active.ai {
+      border-color: var(--accent-purple);
+      background: rgba(192, 132, 252, 0.1);
+      color: var(--accent-purple);
+    }
+
+    /* Target Language Quick Ribbon */
+    .lang-ribbon {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-bottom: 10px;
+    }
+
+    .lang-pill {
+      flex: 1;
+      padding: 5px 4px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 600;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .lang-pill:hover {
+      background: var(--bg-surface-elevated);
+      color: #fff;
+    }
+
+    .lang-pill.active {
+      background: #0284c7;
+      color: #fff;
+      border-color: #38bdf8;
+      box-shadow: 0 0 10px rgba(2, 132, 199, 0.3);
+    }
+
+    .lang-more-select {
+      width: 70px;
+      padding: 5px 6px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      color: var(--text-muted);
+      font-size: 11px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    /* Tone & Intent Bar */
+    .tone-bar {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 12px;
+      background: var(--bg-surface);
+      padding: 3px;
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .tone-tab {
+      flex: 1;
+      padding: 4px 2px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s ease;
+    }
+
+    .tone-tab:hover {
+      color: #fff;
+    }
+
+    .tone-tab.active {
+      background: var(--bg-surface-elevated);
+      color: var(--accent-cyan);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Focus Deck: Source Inspector */
+    .source-deck {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 8px 10px;
+      margin-bottom: 10px;
+      position: relative;
+    }
+
+    .deck-subhead {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 10.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .source-textarea {
+      width: 100%;
+      height: 60px;
+      background: transparent;
+      border: none;
+      color: #cbd5e1;
+      font-size: 12px;
+      line-height: 1.45;
+      resize: none;
+      outline: none;
+    }
+
+    .deck-tools {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      font-size: 10px;
+      color: #64748b;
+    }
+
+    .clear-link {
+      background: none;
+      border: none;
+      color: #64748b;
+      cursor: pointer;
+      font-size: 10px;
+    }
+
+    .clear-link:hover {
+      color: #ef4444;
+    }
+
+    /* Primary Reading Canvas */
+    .reading-canvas {
+      background: linear-gradient(180deg, #131d31 0%, #0c1220 100%);
+      border: 1px solid #1e3a5f;
+      border-radius: 12px;
+      padding: 12px;
+      min-height: 120px;
+      position: relative;
+      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.3);
+    }
+
+    .canvas-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .canvas-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .canvas-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .action-btn {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      color: #cbd5e1;
+      padding: 3px 7px;
+      border-radius: 6px;
+      font-size: 11px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      transition: all 0.15s ease;
+    }
+
+    .action-btn:hover {
+      background: #334155;
+      color: #fff;
+    }
+
+    .canvas-body {
+      font-size: 13.5px;
+      color: #f8fafc;
+      line-height: 1.6;
+      font-weight: 400;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .placeholder-hint {
+      color: #64748b;
+      font-style: italic;
+      font-size: 12px;
+    }
+
+    /* Translate trigger button */
+    .trigger-bar {
+      margin-top: 10px;
+    }
+
+    .trigger-btn {
+      width: 100%;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+      color: #fff;
+      font-size: 12.5px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35);
+      transition: all 0.15s ease;
+    }
+
+    .trigger-btn:hover {
+      opacity: 0.95;
+      transform: translateY(-1px);
+    }
+
+    .trigger-btn:disabled {
+      background: #334155;
+      color: #94a3b8;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+
+    .spinner {
+      width: 13px;
+      height: 13px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <div class="hud-header">
+    <div class="brand-group">
+      <div class="brand-symbol">⚡</div>
+      <div class="brand-title">QuickLens</div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 6px;">
+      <button id="engine-toggle-btn" class="engine-badge-btn" title="AIキー金庫を開く">
+        <span id="engine-badge-dot">●</span>
+        <span id="engine-badge-text">無料モード</span>
+        <span>⚙️</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Collapsible Secure Key Vault -->
+  <div id="vault-drawer" class="vault-drawer">
+    <div class="vault-title">
+      <span>🔐 セキュア・ローカル金庫 (AES-GCM 256bit)</span>
+      <span style="font-size: 10px; color: #94a3b8;">登録不要・端末内完結</span>
+    </div>
+    <div class="vault-desc">
+      あなたのAPIキーは端末内で暗号化保存され、Google/OpenAIの公式エンドポイントへ直接送信されます。第三者サーバーは一切経由しません。
+    </div>
+
+    <div class="vault-input-group">
+      <label class="vault-label">Google Gemini API Key (推奨・格安):</label>
+      <div class="vault-input-row">
+        <input type="password" id="gemini-key-input" class="vault-input" placeholder="AIzaSy...">
+        <button id="save-gemini-btn" class="vault-btn">保存</button>
+      </div>
+    </div>
+
+    <div class="vault-input-group">
+      <label class="vault-label">OpenAI API Key:</label>
+      <div class="vault-input-row">
+        <input type="password" id="openai-key-input" class="vault-input" placeholder="sk-proj-...">
+        <button id="save-openai-btn" class="vault-btn">保存</button>
+      </div>
+    </div>
+
+    <div class="vault-engine-selector">
+      <div id="chip-free" class="engine-chip active">🆓 無料 (キー不要)</div>
+      <div id="chip-gemini" class="engine-chip">⚡ Gemini AI</div>
+      <div id="chip-openai" class="engine-chip">🧠 OpenAI</div>
+    </div>
+  </div>
+
+  <!-- Target Language Quick Ribbon -->
+  <div class="lang-ribbon">
+    <button class="lang-pill active" data-lang="ja">🇯🇵 日本語</button>
+    <button class="lang-pill" data-lang="en">🇺🇸 英語</button>
+    <button class="lang-pill" data-lang="zh-CN">🇨🇳 中国語</button>
+    <button class="lang-pill" data-lang="ko">🇰🇷 韓国語</button>
+    <button class="lang-pill" data-lang="es">🇪🇸 西語</button>
+    <select id="more-lang-select" class="lang-more-select" title="その他の言語">
+      <option value="">＋他</option>
+      <option value="fr">🇫🇷 仏語</option>
+      <option value="de">🇩🇪 独語</option>
+      <option value="it">🇮🇹 伊語</option>
+      <option value="ru">🇷🇺 露語</option>
+    </select>
+  </div>
+
+  <!-- Tone & Intent Bar -->
+  <div class="tone-bar">
+    <button class="tone-tab active" data-tone="natural">💬 自然な訳</button>
+    <button class="tone-tab" data-tone="business">👔 ビジネス敬語</button>
+    <button class="tone-tab" data-tone="summary">📝 要約</button>
+    <button class="tone-tab" data-tone="breakdown">🔍 解説</button>
+  </div>
+
+  <!-- Focus Deck: Source Inspector -->
+  <div class="source-deck">
+    <div class="deck-subhead">
+      <span id="detected-badge">検出コンテキスト</span>
+      <div class="deck-tools">
+        <button id="clear-source-btn" class="clear-link">クリア</button>
+        <span id="source-char-count">0文字</span>
+      </div>
+    </div>
+    <textarea id="source-input" class="source-textarea" placeholder="Webページでテキストを選択するか、ここに入力..."></textarea>
+  </div>
+
+  <!-- Trigger Button -->
+  <div class="trigger-bar">
+    <button id="trigger-btn" class="trigger-btn">
+      <span id="trigger-spinner" class="spinner" style="display: none;"></span>
+      <span id="trigger-text">読み解く (Ctrl+Enter)</span>
+    </button>
+  </div>
+
+  <!-- Primary Reading Canvas -->
+  <div class="reading-canvas" style="margin-top: 10px;">
+    <div class="canvas-header">
+      <div class="canvas-title">
+        <span>✨ 理解インサイト</span>
+      </div>
+      <div class="canvas-actions">
+        <button id="canvas-copy-btn" class="action-btn" title="コピー">📋 コピー</button>
+        <button id="canvas-speak-btn" class="action-btn" title="読み上げ">🔊 発音</button>
+      </div>
+    </div>
+    <div id="canvas-result" class="canvas-body placeholder-hint">
+      選択テキストを自動取得してここに表示します
+    </div>
+  </div>
+
+  <script src="crypto-vault.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
