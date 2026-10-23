@@ -32,6 +32,7 @@
         "<all_urls>"
       ],
       "js": [
+        "config.js",
         "content.js"
       ],
       "all_frames": true,

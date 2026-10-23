@@ -1,20 +1,10 @@
 /**
  * QuickLens - Manifest V3 Background Service Worker
- * @license Apache-2.0
  */
 
-importScripts("crypto-vault.js");
+importScripts("config.js", "crypto-vault.js");
 
-// デフォルト設定
-const DEFAULT_SETTINGS = {
-  engine: "free", // "free" | "gemini" | "openai" | "deepl"
-  tone: "natural", // "natural" | "business" | "summary" | "breakdown"
-  targetLang: "ja",
-  sourceLang: "auto",
-  autoTranslatePopup: true,
-  toastDuration: 10000,
-  position: "floating"
-};
+const { DEFAULT_SETTINGS, CONTEXT_MENU, ACTIONS, API, TIMING, CONTENT_SCRIPT_FILES } = self.QUICKLENS_CONFIG;
 
 // インストール時の初期化
 chrome.runtime.onInstalled.addListener(() => {
@@ -24,8 +14,8 @@ chrome.runtime.onInstalled.addListener(() => {
 
   // 右クリックコンテキストメニュー
   chrome.contextMenus.create({
-    id: "quicklens-translate-selection",
-    title: "QuickLens で読み解く (「%s」)",
+    id: CONTEXT_MENU.ID,
+    title: CONTEXT_MENU.TITLE,
     contexts: ["selection"]
   });
 });
@@ -37,46 +27,35 @@ chrome.runtime.onInstalled.addListener(() => {
  * ユーザー登録不要のマイAIキー: Gemini / OpenAI / DeepL をセキュアに利用可能
  * ==============================================================
  */
-async function translateWithEngine(text, targetLang = "ja", tone = "natural", sourceLang = "auto") {
+async function translateWithEngine(text, targetLang = DEFAULT_SETTINGS.targetLang, tone = DEFAULT_SETTINGS.tone, sourceLang = DEFAULT_SETTINGS.sourceLang) {
   if (!text || !text.trim()) return { translatedText: "", meta: {} };
 
   const settings = await chrome.storage.sync.get(DEFAULT_SETTINGS);
-  const engine = settings.engine || "free";
+  const engine = settings.engine || DEFAULT_SETTINGS.engine;
 
-  // 1. ユーザー所有のGemini APIキーを使用する場合
-  if (engine === "gemini") {
-    const apiKey = await self.VaultCrypto.getDecryptedApiKey("gemini");
+  // 1. ユーザー所有のAIキー (Gemini / OpenAI) を使用する場合
+  const aiTranslator = AI_TRANSLATORS[engine];
+  if (aiTranslator) {
+    const apiKey = await self.VaultCrypto.getDecryptedApiKey(engine);
     if (apiKey) {
       try {
-        return await translateViaGemini(text, targetLang, tone, sourceLang, apiKey);
-      } catch (geminiError) {
-        console.warn("[QuickLens] Gemini API失敗のため無料エンジンへ自動フォールバック:", geminiError);
+        return await aiTranslator.translate(text, targetLang, tone, sourceLang, apiKey);
+      } catch (aiError) {
         // フォールバックして無料エンジンで実行
+        console.warn(`[QuickLens] ${aiTranslator.label} API失敗のため無料エンジンへ自動フォールバック:`, aiError);
       }
     }
   }
 
-  // 2. ユーザー所有のOpenAI APIキーを使用する場合
-  if (engine === "openai") {
-    const apiKey = await self.VaultCrypto.getDecryptedApiKey("openai");
-    if (apiKey) {
-      try {
-        return await translateViaOpenAI(text, targetLang, tone, sourceLang, apiKey);
-      } catch (openaiError) {
-        console.warn("[QuickLens] OpenAI API失敗のため無料エンジンへ自動フォールバック:", openaiError);
-      }
-    }
-  }
-
-  // 3. デフォルト / フォールバック: 無料GoogleパブリックAPI
+  // 2. デフォルト / フォールバック: 無料GoogleパブリックAPI
   return await translateViaFreeEngine(text, targetLang, sourceLang);
 }
 
 /**
  * 無料 GoogleパブリックGTXエンジン（キー不要・即時）
  */
-async function translateViaFreeEngine(text, targetLang = "ja", sourceLang = "auto") {
-  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${encodeURIComponent(
+async function translateViaFreeEngine(text, targetLang = DEFAULT_SETTINGS.targetLang, sourceLang = DEFAULT_SETTINGS.sourceLang) {
+  const url = `${API.FREE_TRANSLATE_URL}?client=gtx&sl=${encodeURIComponent(
     sourceLang
   )}&tl=${encodeURIComponent(targetLang)}&dt=t&q=${encodeURIComponent(text)}`;
 
@@ -110,7 +89,7 @@ async function translateViaGemini(text, targetLang, tone, sourceLang, apiKey) {
   };
 
   const systemInstruction = promptMap[tone] || promptMap.natural;
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
+  const endpoint = `${API.GEMINI_BASE_URL}/${API.GEMINI_MODEL}:generateContent?key=${encodeURIComponent(apiKey)}`;
 
   const payload = {
     contents: [
@@ -122,8 +101,8 @@ async function translateViaGemini(text, targetLang, tone, sourceLang, apiKey) {
       }
     ],
     generationConfig: {
-      temperature: 0.3,
-      maxOutputTokens: 1024
+      temperature: API.TEMPERATURE,
+      maxOutputTokens: API.GEMINI_MAX_OUTPUT_TOKENS
     }
   };
 
@@ -159,15 +138,15 @@ async function translateViaOpenAI(text, targetLang, tone, sourceLang, apiKey) {
     breakdown: `Translation in ${targetLang} followed by brief vocabulary and nuance nuances breakdown`
   }[tone] || `Accurate ${targetLang}`;
 
-  const res = await fetch("https://api.openai.com/v1/chat/completions", {
+  const res = await fetch(API.OPENAI_CHAT_URL, {
     method: "POST",
     headers: {
       "Authorization": `Bearer ${apiKey}`,
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      model: "gpt-4o-mini",
-      temperature: 0.3,
+      model: API.OPENAI_MODEL,
+      temperature: API.TEMPERATURE,
       messages: [
         {
           role: "system",
@@ -190,6 +169,12 @@ async function translateViaOpenAI(text, targetLang, tone, sourceLang, apiKey) {
   };
 }
 
+// ユーザー所有キーで利用できるAIエンジン
+const AI_TRANSLATORS = {
+  gemini: { label: "Gemini", translate: translateViaGemini },
+  openai: { label: "OpenAI", translate: translateViaOpenAI }
+};
+
 /**
  * Gmail / GitHub / 動的SPA 等の特殊環境に対応した安全なメッセージ送信＆自動スクリプト注入
  */
@@ -208,7 +193,7 @@ async function sendToTabWithFallback(tabId, frameId, message) {
           tabId: tabId,
           frameIds: typeof frameId === "number" ? [frameId] : [0]
         },
-        files: ["content.js"]
+        files: [...CONTENT_SCRIPT_FILES]
       });
 
       // 注入完了をわずかに待機して再送
@@ -216,7 +201,7 @@ async function sendToTabWithFallback(tabId, frameId, message) {
         chrome.tabs.sendMessage(tabId, message, options).catch((retryErr) => {
           console.warn("[QuickLens] 再送メッセージのエラー（保護ページ等の可能性）:", retryErr);
         });
-      }, 120);
+      }, TIMING.REINJECT_RETRY_DELAY);
     } catch (injectErr) {
       console.warn("[QuickLens] スクリプトの動的注入が拒否されました（chrome:// 等の保護ページ）:", injectErr);
     }
@@ -225,40 +210,40 @@ async function sendToTabWithFallback(tabId, frameId, message) {
 
 // 右クリックメニューのクリックハンドラー
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
-  if (info.menuItemId !== "quicklens-translate-selection") return;
+  if (info.menuItemId !== CONTEXT_MENU.ID) return;
   if (!tab || !tab.id) return;
 
   const selectedText = info.selectionText ? info.selectionText.trim() : "";
   if (!selectedText) return;
 
   const settings = await chrome.storage.sync.get(DEFAULT_SETTINGS);
-  const targetLang = settings.targetLang || "ja";
-  const tone = settings.tone || "natural";
+  const targetLang = settings.targetLang || DEFAULT_SETTINGS.targetLang;
+  const tone = settings.tone || DEFAULT_SETTINGS.tone;
   const frameId = info.frameId || 0;
 
   // 1. ローディングトーストを表示（Gmailの特定iframe内でも正確に表示）
   await sendToTabWithFallback(tab.id, frameId, {
-    action: "SHOW_LOADING_HUD",
+    action: ACTIONS.SHOW_LOADING_HUD,
     text: selectedText
   });
 
   try {
     // 2. 翻訳実行
-    const result = await translateWithEngine(selectedText, targetLang, tone, settings.sourceLang || "auto");
+    const result = await translateWithEngine(selectedText, targetLang, tone, settings.sourceLang || DEFAULT_SETTINGS.sourceLang);
 
     // 3. 完了トーストを表示
     await sendToTabWithFallback(tab.id, frameId, {
-      action: "SHOW_TRANSLATION_HUD",
+      action: ACTIONS.SHOW_TRANSLATION_HUD,
       originalText: selectedText,
       translatedText: result.translatedText,
       targetLang: targetLang,
-      engineUsed: result.engineUsed || "free",
+      engineUsed: result.engineUsed || DEFAULT_SETTINGS.engine,
       tone: tone,
-      duration: settings.toastDuration || 10000
+      duration: settings.toastDuration || DEFAULT_SETTINGS.toastDuration
     });
   } catch (err) {
     await sendToTabWithFallback(tab.id, frameId, {
-      action: "SHOW_ERROR_HUD",
+      action: ACTIONS.SHOW_ERROR_HUD,
       errorMessage: "翻訳の取得に失敗しました。ネットワークまたはAPIキーを確認してください。"
     });
   }
@@ -266,7 +251,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 
 // ポップアップやコンテンツスクリプトからのメッセージ受信
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === "EXECUTE_TRANSLATION") {
+  if (request.action === ACTIONS.EXECUTE_TRANSLATION) {
     translateWithEngine(request.text, request.targetLang, request.tone, request.sourceLang)
       .then((res) => {
         sendResponse({ success: true, ...res });
@@ -278,14 +263,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 
   // 暗号化キー管理
-  if (request.action === "VAULT_SAVE_KEY") {
+  if (request.action === ACTIONS.VAULT_SAVE_KEY) {
     self.VaultCrypto.saveEncryptedApiKey(request.provider, request.apiKey)
       .then(() => sendResponse({ success: true }))
       .catch((err) => sendResponse({ success: false, error: err.message }));
     return true;
   }
 
-  if (request.action === "VAULT_GET_STATUS") {
+  if (request.action === ACTIONS.VAULT_GET_STATUS) {
     self.VaultCrypto.getApiKeyStatus()
       .then((status) => sendResponse({ success: true, status }))
       .catch((err) => sendResponse({ success: false, error: err.message }));

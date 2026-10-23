@@ -1,9 +1,11 @@
 /**
  * QuickLens - Popup Controller
- * @license Apache-2.0
  */
 
 document.addEventListener("DOMContentLoaded", async () => {
+  const { DEFAULT_SETTINGS, ACTIONS, TIMING, ENGINE_BADGE_LABELS } = self.QUICKLENS_CONFIG;
+  const RESTRICTED_URL_PREFIXES = ["chrome://", "edge://"];
+
   // UI References
   const engineToggleBtn = document.getElementById("engine-toggle-btn");
   const engineBadgeText = document.getElementById("engine-badge-text");
@@ -33,22 +35,22 @@ document.addEventListener("DOMContentLoaded", async () => {
   const canvasCopyBtn = document.getElementById("canvas-copy-btn");
   const canvasSpeakBtn = document.getElementById("canvas-speak-btn");
 
-  let currentTargetLang = "ja";
-  let currentTone = "natural";
-  let currentEngine = "free";
+  let currentTargetLang = DEFAULT_SETTINGS.targetLang;
+  let currentTone = DEFAULT_SETTINGS.tone;
+  let currentEngine = DEFAULT_SETTINGS.engine;
   let currentTranslatedOutput = "";
 
   // 1. 設定の読み込み
   const settings = await chrome.storage.sync.get({
-    engine: "free",
-    tone: "natural",
-    targetLang: "ja",
-    autoTranslatePopup: true
+    engine: DEFAULT_SETTINGS.engine,
+    tone: DEFAULT_SETTINGS.tone,
+    targetLang: DEFAULT_SETTINGS.targetLang,
+    autoTranslatePopup: DEFAULT_SETTINGS.autoTranslatePopup
   });
 
-  currentTargetLang = settings.targetLang || "ja";
-  currentTone = settings.tone || "natural";
-  currentEngine = settings.engine || "free";
+  currentTargetLang = settings.targetLang || DEFAULT_SETTINGS.targetLang;
+  currentTone = settings.tone || DEFAULT_SETTINGS.tone;
+  currentEngine = settings.engine || DEFAULT_SETTINGS.engine;
 
   updateLanguagePillsUI(currentTargetLang);
   updateToneTabsUI(currentTone);
@@ -58,8 +60,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   // 2. アクティブタブからテキスト自動検出 (Gmail/GitHub/SPA完全対応)
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    if (tab && tab.id && !tab.url.startsWith("chrome://") && !tab.url.startsWith("edge://")) {
-      chrome.tabs.sendMessage(tab.id, { action: "GET_SELECTED_TEXT" }, (response) => {
+    if (tab && tab.id && !RESTRICTED_URL_PREFIXES.some((prefix) => tab.url.startsWith(prefix))) {
+      chrome.tabs.sendMessage(tab.id, { action: ACTIONS.GET_SELECTED_TEXT }, (response) => {
         if (chrome.runtime.lastError) {
           // コンテンツスクリプト未ロード時の安全なフォールバック
           chrome.scripting.executeScript(
@@ -183,15 +185,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (engine === "gemini") {
       chipGemini.classList.add("active", "ai");
-      engineBadgeText.textContent = "Gemini AI";
+      engineBadgeText.textContent = ENGINE_BADGE_LABELS.gemini;
       engineToggleBtn.classList.add("ai");
     } else if (engine === "openai") {
       chipOpenai.classList.add("active", "ai");
-      engineBadgeText.textContent = "OpenAI";
+      engineBadgeText.textContent = ENGINE_BADGE_LABELS.openai;
       engineToggleBtn.classList.add("ai");
     } else {
       chipFree.classList.add("active");
-      engineBadgeText.textContent = "無料モード";
+      engineBadgeText.textContent = ENGINE_BADGE_LABELS.free;
       engineToggleBtn.classList.remove("ai");
     }
   }
@@ -211,25 +213,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  saveGeminiBtn.addEventListener("click", async () => {
-    const key = geminiKeyInput.value.trim();
-    await self.VaultCrypto.saveEncryptedApiKey("gemini", key);
-    saveGeminiBtn.textContent = "✓ 保存";
-    geminiKeyInput.value = "";
-    await refreshVaultStatus();
-    updateEngineUI("gemini");
-    setTimeout(() => { saveGeminiBtn.textContent = "保存"; }, 1500);
-  });
+  function bindKeySaveButton(provider, saveBtn, keyInput) {
+    saveBtn.addEventListener("click", async () => {
+      const key = keyInput.value.trim();
+      await self.VaultCrypto.saveEncryptedApiKey(provider, key);
+      saveBtn.textContent = "✓ 保存";
+      keyInput.value = "";
+      await refreshVaultStatus();
+      updateEngineUI(provider);
+      setTimeout(() => { saveBtn.textContent = "保存"; }, TIMING.BUTTON_FEEDBACK);
+    });
+  }
 
-  saveOpenaiBtn.addEventListener("click", async () => {
-    const key = openaiKeyInput.value.trim();
-    await self.VaultCrypto.saveEncryptedApiKey("openai", key);
-    saveOpenaiBtn.textContent = "✓ 保存";
-    openaiKeyInput.value = "";
-    await refreshVaultStatus();
-    updateEngineUI("openai");
-    setTimeout(() => { saveOpenaiBtn.textContent = "保存"; }, 1500);
-  });
+  bindKeySaveButton("gemini", saveGeminiBtn, geminiKeyInput);
+  bindKeySaveButton("openai", saveOpenaiBtn, openaiKeyInput);
 
   // 翻訳・読み解きメイン処理
   async function executeInsight() {
@@ -250,7 +247,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const response = await new Promise((resolve, reject) => {
         chrome.runtime.sendMessage(
           {
-            action: "EXECUTE_TRANSLATION",
+            action: ACTIONS.EXECUTE_TRANSLATION,
             text: text,
             targetLang: currentTargetLang,
             tone: currentTone
@@ -293,7 +290,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!currentTranslatedOutput) return;
     await navigator.clipboard.writeText(currentTranslatedOutput);
     canvasCopyBtn.textContent = "✓ 完了";
-    setTimeout(() => { canvasCopyBtn.textContent = "📋 コピー"; }, 1500);
+    setTimeout(() => { canvasCopyBtn.textContent = "📋 コピー"; }, TIMING.BUTTON_FEEDBACK);
   });
 
   // 音声再生

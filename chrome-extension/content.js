@@ -7,6 +7,8 @@
   if (window.__quickLensInitialized) return;
   window.__quickLensInitialized = true;
 
+  const { ACTIONS, TIMING, HUD, TONE_LABELS, DEFAULT_SETTINGS } = globalThis.QUICKLENS_CONFIG;
+
   // ホスト要素とShadowRootの参照
   let hostEl = null;
   let shadowRoot = null;
@@ -203,7 +205,7 @@
     hud.className = "quicklens-hud";
     activeHudEl = hud;
 
-    const preview = text.length > 25 ? text.slice(0, 25) + "..." : text;
+    const preview = truncate(text, HUD.LOADING_PREVIEW_LENGTH);
 
     hud.innerHTML = `
       <div class="quicklens-bar">
@@ -221,7 +223,7 @@
   }
 
   // 翻訳結果HUDの表示
-  function showTranslationHud(originalText, translatedText, targetLang, engineUsed, tone, duration = 10000) {
+  function showTranslationHud(originalText, translatedText, targetLang, engineUsed, tone, duration = DEFAULT_SETTINGS.toastDuration) {
     const root = ensureShadowContainer().getElementById("quicklens-root");
     dismissCurrentHud();
 
@@ -231,15 +233,9 @@
 
     const isAi = engineUsed === "gemini" || engineUsed === "openai";
     const engineLabel = isAi ? (engineUsed === "gemini" ? "✨ Gemini AI" : "🧠 OpenAI") : "🆓 無料エンジン";
-    const toneLabels = {
-      natural: "自然な訳",
-      business: "ビジネス敬語",
-      summary: "要約",
-      breakdown: "解説つき"
-    };
-    const toneLabel = toneLabels[tone] || "標準";
+    const toneLabel = TONE_LABELS[tone] || "標準";
 
-    const originalPreview = originalText.length > 90 ? originalText.slice(0, 90) + "..." : originalText;
+    const originalPreview = truncate(originalText, HUD.ORIGINAL_PREVIEW_LENGTH);
 
     hud.innerHTML = `
       <div class="quicklens-bar">
@@ -277,7 +273,7 @@
     copyBtn?.addEventListener("click", () => {
       navigator.clipboard.writeText(translatedText).then(() => {
         copyBtn.textContent = "✓ 完了";
-        setTimeout(() => { if (copyBtn) copyBtn.textContent = "📋 コピー"; }, 1500);
+        setTimeout(() => { if (copyBtn) copyBtn.textContent = "📋 コピー"; }, TIMING.BUTTON_FEEDBACK);
       });
     });
 
@@ -301,7 +297,7 @@
       dismissTimer = setTimeout(() => dismissCurrentHud(), duration);
       hud.addEventListener("mouseenter", () => clearTimeout(dismissTimer));
       hud.addEventListener("mouseleave", () => {
-        dismissTimer = setTimeout(() => dismissCurrentHud(), 3500);
+        dismissTimer = setTimeout(() => dismissCurrentHud(), TIMING.HUD_RESUME_DISMISS);
       });
     }
   }
@@ -326,7 +322,7 @@
 
     root.appendChild(hud);
     hud.querySelector("#ql-close")?.addEventListener("click", () => dismissCurrentHud());
-    setTimeout(() => dismissCurrentHud(), 5000);
+    setTimeout(() => dismissCurrentHud(), TIMING.ERROR_HUD_DURATION);
   }
 
   function dismissCurrentHud() {
@@ -337,7 +333,7 @@
     activeHudEl = null;
     setTimeout(() => {
       if (target && target.parentNode) target.parentNode.removeChild(target);
-    }, 180);
+    }, TIMING.HUD_CLOSE_ANIMATION);
   }
 
   // Escキーで閉じる
@@ -368,6 +364,10 @@
     return "";
   }
 
+  function truncate(text, maxLength) {
+    return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
+  }
+
   function escapeHTML(str) {
     return str
       .replace(/&/g, "&amp;")
@@ -379,10 +379,10 @@
 
   // メッセージハンドラー
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === "SHOW_LOADING_HUD") {
+    if (request.action === ACTIONS.SHOW_LOADING_HUD) {
       showLoadingHud(request.text || "");
       sendResponse({ status: "ok" });
-    } else if (request.action === "SHOW_TRANSLATION_HUD") {
+    } else if (request.action === ACTIONS.SHOW_TRANSLATION_HUD) {
       showTranslationHud(
         request.originalText,
         request.translatedText,
@@ -392,10 +392,10 @@
         request.duration
       );
       sendResponse({ status: "ok" });
-    } else if (request.action === "SHOW_ERROR_HUD") {
+    } else if (request.action === ACTIONS.SHOW_ERROR_HUD) {
       showErrorHud(request.errorMessage);
       sendResponse({ status: "ok" });
-    } else if (request.action === "GET_SELECTED_TEXT") {
+    } else if (request.action === ACTIONS.GET_SELECTED_TEXT) {
       const text = extractPageSelection();
       sendResponse({ selectionText: text });
     }
