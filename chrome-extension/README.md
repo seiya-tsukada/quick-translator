@@ -37,6 +37,7 @@ Webページ上でハイライト（選択）したテキストを、右クリ�
 ```text
 chrome-extension/
 ├── manifest.json        # 拡張機能設定 (all_frames, host_permissions, MV3)
+├── config.js            # 共通定義ファイル (設定初期値, API, タイミング等の定数)
 ├── background.js        # サービスワーカー (翻訳ルーティング, フレーム安全送信)
 ├── crypto-vault.js      # AES-GCM 256bit 暗号化・復号ユーティリティ
 ├── content.js           # ページ内Shadow DOMトースト描画＆多層テキスト抽出

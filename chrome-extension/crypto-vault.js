@@ -4,8 +4,9 @@
  * サーバー不要・ユーザー登録不要・端末内完結
  */
 
-const VAULT_STORAGE_KEY = "quicklens_secure_vault";
-const DEVICE_SALT_KEY = "quicklens_device_salt";
+const VAULT_CONFIG = self.QUICKLENS_CONFIG.VAULT;
+const VAULT_STORAGE_KEY = VAULT_CONFIG.STORAGE_KEY;
+const DEVICE_SALT_KEY = VAULT_CONFIG.DEVICE_SALT_KEY;
 
 // 端末固有の暗号化ソルトを取得または生成
 async function getOrCreateDeviceSalt() {
@@ -13,7 +14,7 @@ async function getOrCreateDeviceSalt() {
   if (result[DEVICE_SALT_KEY]) {
     return new Uint8Array(result[DEVICE_SALT_KEY]);
   }
-  const newSalt = crypto.getRandomValues(new Uint8Array(16));
+  const newSalt = crypto.getRandomValues(new Uint8Array(VAULT_CONFIG.SALT_BYTES));
   await chrome.storage.local.set({ [DEVICE_SALT_KEY]: Array.from(newSalt) });
   return newSalt;
 }
@@ -22,11 +23,11 @@ async function getOrCreateDeviceSalt() {
 async function deriveVaultKey() {
   const salt = await getOrCreateDeviceSalt();
   // Chrome拡張機能固有のIDと拡張スコープに基づく安全なシード
-  const extensionId = chrome.runtime.id || "quicklens-default-id";
+  const extensionId = chrome.runtime.id || VAULT_CONFIG.FALLBACK_EXTENSION_ID;
   const enc = new TextEncoder();
   const keyMaterial = await crypto.subtle.importKey(
     "raw",
-    enc.encode(`quicklens_secret_${extensionId}`),
+    enc.encode(`${VAULT_CONFIG.SECRET_PREFIX}${extensionId}`),
     { name: "PBKDF2" },
     false,
     ["deriveKey"]
@@ -36,11 +37,11 @@ async function deriveVaultKey() {
     {
       name: "PBKDF2",
       salt: salt,
-      iterations: 100000,
-      hash: "SHA-256"
+      iterations: VAULT_CONFIG.PBKDF2_ITERATIONS,
+      hash: VAULT_CONFIG.PBKDF2_HASH
     },
     keyMaterial,
-    { name: "AES-GCM", length: 256 },
+    { name: "AES-GCM", length: VAULT_CONFIG.AES_KEY_LENGTH },
     false,
     ["encrypt", "decrypt"]
   );
@@ -61,7 +62,7 @@ async function saveEncryptedApiKey(provider, apiKey) {
   }
 
   const key = await deriveVaultKey();
-  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const iv = crypto.getRandomValues(new Uint8Array(VAULT_CONFIG.IV_BYTES));
   const enc = new TextEncoder();
   const encoded = enc.encode(apiKey.trim());
 
