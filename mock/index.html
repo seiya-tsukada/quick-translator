@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>QuickLens Mock</title>
+<style>
+  :root { --bg:#eef0f3; --card:#fff; --fg:#1f2328; --muted:#667085; --border:#d0d5dd; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:14px system-ui, sans-serif; background:var(--bg); color:var(--fg); }
+  header { position:sticky; top:0; z-index:5; display:flex; flex-wrap:wrap; gap:12px; align-items:center; padding:10px 16px; background:var(--card); border-bottom:1px solid var(--border); }
+  header h1 { font-size:15px; margin:0 8px 0 0; }
+  header label { color:var(--muted); font-size:12px; display:flex; gap:6px; align-items:center; }
+  nav { display:flex; gap:4px; }
+  nav button, .act { border:1px solid var(--border); background:var(--card); border-radius:999px; padding:4px 12px; cursor:pointer; font:inherit; font-size:13px; }
+  nav button[aria-pressed=true] { background:#1f2328; color:#fff; border-color:#1f2328; }
+  main { padding:20px 16px; display:flex; justify-content:center; }
+  .chrome { background:#dee1e6; border-radius:10px; box-shadow:0 8px 30px rgba(0,0,0,.12); overflow:hidden; width:min(1100px,100%); }
+  .bar { display:flex; align-items:center; gap:8px; padding:8px 12px; }
+  .dots span { display:inline-block; width:11px; height:11px; border-radius:50%; margin-right:5px; background:#ff5f57; }
+  .dots span:nth-child(2){background:#febc2e} .dots span:nth-child(3){background:#28c840}
+  .url { flex:1; background:#fff; border-radius:999px; padding:4px 12px; color:var(--muted); font-size:12px; }
+  .exticon { width:22px; height:22px; border-radius:4px; }
+  .stage { position:relative; background:#fff; height:calc(100vh - 140px); min-height:560px; }
+  .stage > iframe.page { width:100%; height:100%; border:0; display:block; }
+  .popup { position:absolute; top:6px; right:14px; border-radius:8px; box-shadow:0 6px 24px rgba(0,0,0,.25); background:#fff; overflow:hidden; }
+  .popup iframe { width:404px; height:640px; border:0; display:block; }
+  [hidden] { display:none !important; }
+</style>
+</head>
+<body>
+<header>
+  <h1>QuickLens モック</h1>
+  <nav id="tabs">
+    <button data-view="popup" aria-pressed="true">Popup</button>
+    <button data-view="hud">ページ内HUD</button>
+    <button data-view="options">Options</button>
+    <button data-view="onboarding">Onboarding</button>
+  </nav>
+  <label>言語 <select id="lang"><option value="ja">ja</option><option value="en">en</option></select></label>
+  <label>テーマ <select id="theme"><option value="light">light</option><option value="dark">dark</option><option value="system">system</option></select></label>
+  <label>選択テキスト <input id="sel" value="The quick brown fox jumps over the lazy dog." size="28"></label>
+  <button class="act" id="hud-btn" hidden>HUDを表示 (Alt+T)</button>
+  <button class="act" id="reset">ストレージ初期化</button>
+</header>
+<main>
+  <div class="chrome">
+    <div class="bar">
+      <span class="dots"><span></span><span></span><span></span></span>
+      <span class="url" id="url">example.com/article</span>
+      <img class="exticon" src="/ext/icons/icon48.png" alt="">
+    </div>
+    <div class="stage">
+      <iframe class="page" id="page"></iframe>
+      <div class="popup" id="popup"><iframe id="popup-frame"></iframe></div>
+    </div>
+  </div>
+</main>
+<script>
+  const $ = (id) => document.getElementById(id);
+  let view = "popup";
+  const q = () => `lang=${$("lang").value}&theme=${$("theme").value}`;
+  function render() {
+    document.querySelectorAll("#tabs button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.view === view));
+    const extPage = view === "options" || view === "onboarding";
+    $("popup").hidden = view !== "popup";
+    $("hud-btn").hidden = view !== "hud";
+    $("url").textContent = extPage ? `chrome-extension://…/${view}.html` : "example.com/article";
+    $("page").src = extPage ? `/ext/${view}.html?${q()}` : `/__mock/demo.html?${q()}`;
+    if (view === "popup") $("popup-frame").src = `/ext/popup.html?${q()}&sel=${encodeURIComponent($("sel").value)}`;
+  }
+  $("tabs").onclick = (e) => { if (e.target.dataset.view) { view = e.target.dataset.view; render(); } };
+  ["lang", "theme"].forEach((id) => $(id).onchange = render);
+  $("sel").onchange = render;
+  $("hud-btn").onclick = () => $("page").contentWindow.qlTrigger && $("page").contentWindow.qlTrigger();
+  $("reset").onclick = () => { Object.keys(localStorage).filter((k) => k.startsWith("qlmock:")).forEach((k) => localStorage.removeItem(k)); render(); };
+  addEventListener("message", (e) => {
+    if (e.data && e.data.qlmock === "open") { view = e.data.page; render(); }
+    if (e.data && e.data.qlmock === "demo-ready" && view === "hud") $("page").contentWindow.qlTrigger();
+    if (e.data && e.data.qlmock === "selection") {
+      $("sel").value = e.data.text;
+      // Like reopening the toolbar popup: it reads the active tab's selection on load
+      if (view === "popup") $("popup-frame").src = `/ext/popup.html?${q()}&sel=${encodeURIComponent(e.data.text)}`;
+    }
+  });
+  render();
+</script>
+</body>
+</html>

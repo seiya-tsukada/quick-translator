@@ -27,5 +27,13 @@ export default [
   {
     files: ["tests/**/*.js", "scripts/**/*.mjs", "eslint.config.js"],
     languageOptions: { ecmaVersion: 2023, sourceType: "module", globals: { ...globals.node } }
+  },
+  {
+    files: ["mock/server.mjs"],
+    languageOptions: { ecmaVersion: 2023, sourceType: "module", globals: { ...globals.node } }
+  },
+  {
+    files: ["mock/shim.js"],
+    languageOptions: { ecmaVersion: 2023, sourceType: "script", globals: { ...globals.browser } }
   }
 ];

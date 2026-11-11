@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<script src="/__mock/shim.js"></script>
+<title>Demo page</title>
+<style>
+  body { font: 16px/1.7 Georgia, serif; max-width: 640px; margin: 40px auto; padding: 0 20px; color: #222; background: #fff; }
+  .tip { font: 13px system-ui; color: #666; background: #f4f4f5; padding: 8px 12px; border-radius: 8px; }
+</style>
+</head>
+<body>
+  <p class="tip">テキストを選択して <b>Alt+T</b>（またはギャラリー上部の「HUDを表示」）で、ページ内HUDが出ます。</p>
+  <h1>A sample article</h1>
+  <p id="target">The quick brown fox jumps over the lazy dog.</p>
+  <p>Chrome extensions can translate selected text in place without leaving the page. This paragraph is here so you can try selecting a longer passage and see how the HUD lays out multi-line results.</p>
+  <script>
+    const files = ["config.js","lib/errors.js","lib/languages.js","lib/text-chunker.js","lib/router.js","lib/usage.js","lib/icons.js","lib/builtin-translator.js","lib/translate-client.js","lib/theme.js","lib/hud-position.js","content.js"];
+    (async () => {
+      for (const f of files) {
+        await new Promise((ok, ng) => { const s = document.createElement("script"); s.src = "/ext/" + f; s.onload = ok; s.onerror = ng; document.body.appendChild(s); });
+      }
+      window.qlTrigger = () => {
+        let text = String(getSelection()).trim();
+        if (!text) {
+          const r = document.createRange(); r.selectNodeContents(document.getElementById("target"));
+          getSelection().removeAllRanges(); getSelection().addRange(r); text = String(getSelection()).trim();
+        }
+        window.__qlmockDispatch({ action: "QL_TRANSLATE_IN_PAGE", text, selectionInTop: true, viaShortcut: true });
+      };
+      document.addEventListener("keydown", (e) => { if (e.altKey && e.code === "KeyT") { e.preventDefault(); qlTrigger(); } });
+      // Forward drag/keyboard selections to the gallery (→ popup re-reads the selection)
+      let lastSel = "";
+      const reportSelection = () => {
+        const text = String(getSelection()).trim();
+        if (!text || text === lastSel) return;
+        lastSel = text;
+        parent.postMessage({ qlmock: "selection", text }, "*");
+      };
+      document.addEventListener("mouseup", () => setTimeout(reportSelection, 0));
+      document.addEventListener("keyup", (e) => { if (e.shiftKey || e.key === "Shift") reportSelection(); });
+      parent.postMessage({ qlmock: "demo-ready" }, "*");
+    })();
+  </script>
+</body>
+</html>
