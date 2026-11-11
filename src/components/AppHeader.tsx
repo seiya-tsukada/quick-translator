@@ -32,14 +32,14 @@ export default function AppHeader({ activeTab, onTabChange, isZipping, zipSucces
                 Focus Lens UI
               </span>
               <span className="text-[11px] px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-400 font-medium border border-purple-500/30 hidden sm:inline-flex">
-                AES-GCM 暗号化金庫
+                端末内翻訳
               </span>
               <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 font-medium border border-emerald-500/30 hidden md:inline-flex">
-                Gmail・GitHub完全対応
+                自分のキーで AI 翻訳
               </span>
             </div>
             <p className="text-xs text-slate-400 hidden sm:block">
-              既存翻訳アプリの枠を超えた「フォーカス・レンズ読解UI」とセキュアなAIキー保管
+              選択したテキストをすぐに読み解くフォーカス・レンズ翻訳
             </p>
           </div>
         </div>

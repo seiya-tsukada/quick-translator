@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-i18n="onboardingTitle">QuickLens</title>
+  <link rel="stylesheet" href="styles/common.css">
+  <style>
+    body { padding: 40px 16px 64px; }
+    .container { max-width: 760px; margin: 0 auto; }
+    h1 { font-size: 24px; display: flex; gap: 10px; align-items: center; color: var(--accent); }
+    .lead { color: var(--muted); margin: 6px 0 28px; font-size: 14px; }
+    h2 { font-size: 16px; margin: 28px 0 12px; display: flex; gap: 8px; align-items: center; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+    .card h3 { font-size: 14px; display: flex; gap: 6px; align-items: center; margin-bottom: 6px; }
+    .card p { color: var(--muted); font-size: 12.5px; }
+    kbd { font-family: ui-monospace, Menlo, monospace; background: var(--surface-2); border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px; font-size: 12px; color: var(--text); }
+    .engines { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+    .tag { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); margin-bottom: 6px; }
+    .tag.ai { background: var(--ai-soft); color: var(--ai); }
+    .prepare { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+    .progress { width: 100%; max-width: 360px; height: 4px; border-radius: 999px; background: var(--border); overflow: hidden; }
+    .progress > div { height: 100%; width: 0; background: var(--accent); transition: width .2s; }
+    .privacy p + p { margin-top: 6px; }
+    .actions { margin-top: 28px; display: flex; gap: 10px; flex-wrap: wrap; }
+    .donate { margin-top: 36px; font-size: 12px; color: var(--muted); }
+    .donate a { color: var(--muted); }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <h1><span class="icon" data-icon="lens" data-icon-size="26"></span><span data-i18n="onboardingTitle"></span></h1>
+    <p class="lead" data-i18n="onboardingLead"></p>
+
+    <h2><span class="icon" data-icon="pointer" data-icon-size="16"></span><span data-i18n="onboardingHowTitle"></span></h2>
+    <div class="grid">
+      <div class="card">
+        <h3><span class="icon" data-icon="pointer"></span><span data-i18n="howContextMenuTitle"></span></h3>
+        <p data-i18n="howContextMenuBody"></p>
+      </div>
+      <div class="card">
+        <h3><span class="icon" data-icon="keyboard"></span><span data-i18n="howShortcutTitle"></span></h3>
+        <p><span data-i18n="howShortcutBody"></span> <kbd id="shortcut-current"></kbd></p>
+      </div>
+      <div class="card">
+        <h3><span class="icon" data-icon="panel"></span><span data-i18n="howPopupTitle"></span></h3>
+        <p data-i18n="howPopupBody"></p>
+      </div>
+    </div>
+
+    <h2><span class="icon" data-icon="device" data-icon-size="16"></span><span data-i18n="onboardingEnginesTitle"></span></h2>
+    <div class="engines">
+      <div class="card">
+        <span class="tag" data-i18n="engine_free"></span>
+        <p data-i18n="engineFreeExplain"></p>
+        <div class="prepare">
+          <button id="prepare-btn" class="btn primary" type="button"><span class="icon" data-icon="download"></span><span data-i18n="prepareModelButton"></span></button>
+          <div id="prepare-progress" class="progress" hidden><div></div></div>
+          <p id="prepare-status" class="muted" role="status" aria-live="polite"></p>
+        </div>
+      </div>
+      <div class="card">
+        <span class="tag ai" data-i18n="engineAiTag"></span>
+        <p data-i18n="engineAiExplain"></p>
+      </div>
+    </div>
+
+    <h2><span class="icon" data-icon="shield" data-icon-size="16"></span><span data-i18n="sectionPrivacy"></span></h2>
+    <div class="card privacy">
+      <p data-i18n="privacyOnDevice"></p>
+      <p data-i18n="privacyByok"></p>
+      <p data-i18n="privacyKeys"></p>
+      <p data-i18n="privacyNoServer"></p>
+    </div>
+
+    <div class="actions">
+      <button id="open-options" class="btn" type="button"><span class="icon" data-icon="settings"></span><span data-i18n="openSettings"></span></button>
+    </div>
+
+    <p id="donate" class="donate" hidden>
+      <a id="donate-link" target="_blank" rel="noopener noreferrer" data-i18n="onboardingDonateLink"></a>
+    </p>
+  </main>
+
+  <script src="config.js"></script>
+  <script src="lib/errors.js"></script>
+  <script src="lib/languages.js"></script>
+  <script src="lib/text-chunker.js"></script>
+  <script src="lib/icons.js"></script>
+  <script src="lib/theme.js"></script>
+  <script src="lib/i18n-dom.js"></script>
+  <script src="lib/builtin-translator.js"></script>
+  <script src="onboarding.js"></script>
+</body>
+</html>

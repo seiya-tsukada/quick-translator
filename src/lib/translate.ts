@@ -1,35 +1,53 @@
-import { FREE_TRANSLATE_URL, type Tone } from "../config/translation";
+import type { Tone } from "../config/translation";
 
-/** トーンに応じてシミュレーター用の表示形式に整形する */
+/** シミュレーター用：トーンの違いを示すための表示整形（実際の AI 呼び出しは行わない） */
 function applyTone(baseTranslation: string, tone: Tone): string {
   switch (tone) {
     case "business":
-      return `【ビジネス敬語】\n${baseTranslation.replace(/だ。|である。/g, "でございます。").replace(/する。/g, "いたします。")}`;
+      return `【ビジネス敬語（AI エンジン利用時のイメージ）】\n${baseTranslation}`;
     case "summary":
-      return `【重要要点まとめ】\n• ${baseTranslation}\n• セキュリティ要件と分離機構の遵守が推奨されます。`;
+      return `【要約（AI エンジン利用時のイメージ）】\n• ${baseTranslation}`;
     case "breakdown":
-      return `【翻訳】\n${baseTranslation}\n\n【語彙・ニュアンス解説】\n• strict security boundaries: 厳格なセキュリティ境界\n• isolated origins: 独立した実行コンテキスト (Shadow DOMなど)\n• high-performance execution: 高速・低負荷な動作特性`;
+      return `【翻訳＋解説（AI エンジン利用時のイメージ）】\n${baseTranslation}`;
     default:
       return baseTranslation;
   }
 }
 
-/** 無料の Google Translate エンドポイントで翻訳し、トーンに応じた整形を行う */
+interface BuiltinTranslator {
+  translate(text: string): Promise<string>;
+}
+interface TranslatorStatic {
+  availability(opts: { sourceLanguage: string; targetLanguage: string }): Promise<string>;
+  create(opts: { sourceLanguage: string; targetLanguage: string }): Promise<BuiltinTranslator>;
+}
+interface DetectorStatic {
+  create(): Promise<{ detect(text: string): Promise<Array<{ detectedLanguage: string; confidence: number }>> }>;
+}
+
+/** 拡張機能と同じ language code の対応（zh-CN → zh） */
+const BUILTIN_CODES: Record<string, string> = { "zh-CN": "zh", "zh-TW": "zh-Hant" };
+
+/**
+ * Chrome 組み込みの Translator API（端末内翻訳）で翻訳する。
+ * 非対応ブラウザでは、その旨をメッセージとして返す（外部の非公式エンドポイントは使わない）。
+ */
 export async function translateText(text: string, targetLang: string, tone: Tone): Promise<string> {
   if (!text.trim()) return "";
+  const g = globalThis as unknown as { Translator?: TranslatorStatic; LanguageDetector?: DetectorStatic };
+  if (!g.Translator || !g.LanguageDetector) {
+    return "[シミュレーター] このブラウザでは Chrome の端末内翻訳（Translator API）を利用できません。デスクトップ版 Chrome 138 以降で開くと実際に翻訳されます。";
+  }
   try {
-    const url = `${FREE_TRANSLATE_URL}?client=gtx&sl=auto&tl=${encodeURIComponent(targetLang)}&dt=t&q=${encodeURIComponent(text)}`;
-
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
-    const data = await res.json();
-    let baseTranslation = "";
-    if (data && Array.isArray(data[0])) {
-      baseTranslation = data[0].map((item: any) => item[0] || "").join("");
-    }
-    return applyTone(baseTranslation, tone);
-  } catch (err: any) {
-    console.error("Translation API error:", err);
-    return `[翻訳エラー] ネットワーク状況を確認してください (${err.message || "error"})`;
+    const detector = await g.LanguageDetector.create();
+    const [top] = await detector.detect(text);
+    const source = (top?.detectedLanguage || "en").split("-")[0];
+    const target = BUILTIN_CODES[targetLang] || targetLang;
+    if (source === target.split("-")[0]) return applyTone(text, tone);
+    const translator = await g.Translator.create({ sourceLanguage: source, targetLanguage: target });
+    return applyTone(await translator.translate(text), tone);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return `[翻訳エラー] 端末内翻訳を実行できませんでした（${message}）。モデルのダウンロードにはページ上での操作が必要な場合があります。`;
   }
 }

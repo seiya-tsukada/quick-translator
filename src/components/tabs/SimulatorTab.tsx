@@ -7,22 +7,22 @@ const HIGHLIGHTS = [
   {
     icon: Zap,
     iconClassName: "bg-cyan-500/10 text-cyan-400",
-    title: "脱DeepLクローン: Focus Lens UI",
+    title: "Focus Lens UI",
     body: <>2つの枠を並べる旧来型UIを刷新。言語リボン、4つのトーン切替（自然・ビジネス・要約・解説）、読解キャンバスを提供。</>
   },
   {
     icon: Lock,
     iconClassName: "bg-purple-500/10 text-purple-400",
-    title: "登録不要＆端末内AES-GCM暗号化",
-    body: <>デフォルトは完全無料・キー不要。GeminiやOpenAIのマイキーは端末内暗号化保存され、公式APIへ直接通信。</>
+    title: "標準は端末内翻訳",
+    body: <>標準は Chrome 組み込みの端末内翻訳（無料・キー不要）。自分の Gemini / OpenAI / DeepL キーを登録すると、その事業者の公式 API を使えます。</>
   },
   {
     icon: Layers,
     iconClassName: "bg-emerald-500/10 text-emerald-400",
-    title: "Gmail・GitHub・SPA環境に完全耐性",
+    title: "ページの CSS から隔離した表示",
     body: (
       <>
-        Closed Shadow DOMでCSSの衝突を根絶。<code>all_frames: true</code> と動的再注入でiframeやSPA遷移でも確実に稼働。
+        Closed Shadow DOM でページの CSS との衝突を抑えます。<code>activeTab</code> で操作時だけ注入します。
       </>
     )
   }

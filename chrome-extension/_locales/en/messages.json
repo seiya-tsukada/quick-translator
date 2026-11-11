@@ -1,0 +1,510 @@
+{
+  "extName": {
+    "message": "QuickLens Translator"
+  },
+  "extDescription": {
+    "message": "Translate selected text via right-click, shortcut or popup. On-device by default, or use your own Gemini/OpenAI/DeepL key."
+  },
+  "actionTitle": {
+    "message": "QuickLens Translator"
+  },
+  "commandTranslateDescription": {
+    "message": "Translate the selected text"
+  },
+  "contextMenuTitle": {
+    "message": "Translate \"%s\" with QuickLens"
+  },
+  "engine_free": {
+    "message": "On-device"
+  },
+  "engine_gemini": {
+    "message": "Gemini"
+  },
+  "engine_openai": {
+    "message": "OpenAI"
+  },
+  "engine_deepl": {
+    "message": "DeepL"
+  },
+  "engineOption_free": {
+    "message": "On-device (Chrome built-in, free, no key)"
+  },
+  "engineOption_gemini": {
+    "message": "Google Gemini (your own API key)"
+  },
+  "engineOption_openai": {
+    "message": "OpenAI (your own API key)"
+  },
+  "engineOption_deepl": {
+    "message": "DeepL (your own API key)"
+  },
+  "engineAiTag": {
+    "message": "AI engines (your own key)"
+  },
+  "tone_natural": {
+    "message": "Natural"
+  },
+  "tone_business": {
+    "message": "Formal"
+  },
+  "tone_summary": {
+    "message": "Summary"
+  },
+  "tone_breakdown": {
+    "message": "With notes"
+  },
+  "error_AUTH": {
+    "message": "The API key was rejected. Check that it is correct and still valid."
+  },
+  "error_QUOTA": {
+    "message": "The usage limit or rate limit of your API plan was reached. Wait a moment or check your plan."
+  },
+  "error_NETWORK": {
+    "message": "Could not reach the service. Check your connection and try again."
+  },
+  "error_TOO_LONG": {
+    "message": "The text is too long for this engine. Select a shorter passage."
+  },
+  "error_UNSUPPORTED_LANG": {
+    "message": "This language pair is not supported by the selected engine."
+  },
+  "error_NO_KEY": {
+    "message": "No API key is registered for the selected engine."
+  },
+  "error_PERMISSION_MISSING": {
+    "message": "Permission to contact this provider has not been granted. Save the key again in Settings."
+  },
+  "error_BUILTIN_UNAVAILABLE": {
+    "message": "On-device translation is not available in this browser (requires desktop Chrome 138 or later). You can register your own API key instead."
+  },
+  "error_MODEL_DOWNLOAD_REQUIRED": {
+    "message": "The on-device translation model needs to be downloaded first. Click the button to download it and continue."
+  },
+  "error_MODEL_UNAVAILABLE": {
+    "message": "The on-device model could not be prepared on this device (e.g. not enough storage)."
+  },
+  "error_DETECTION_FAILED": {
+    "message": "Could not detect the language of the text. Set the source language in Settings."
+  },
+  "error_NO_SELECTION": {
+    "message": "Select some text on the page first."
+  },
+  "error_UNKNOWN": {
+    "message": "Translation failed due to an unexpected error."
+  },
+  "reason_AUTH": {
+    "message": "authentication error"
+  },
+  "reason_QUOTA": {
+    "message": "usage limit reached"
+  },
+  "reason_NETWORK": {
+    "message": "network error"
+  },
+  "reason_TOO_LONG": {
+    "message": "text too long"
+  },
+  "reason_UNSUPPORTED_LANG": {
+    "message": "unsupported language"
+  },
+  "reason_NO_KEY": {
+    "message": "no API key registered"
+  },
+  "reason_PERMISSION_MISSING": {
+    "message": "permission not granted"
+  },
+  "reason_BUILTIN_UNAVAILABLE": {
+    "message": "on-device translation unavailable"
+  },
+  "reason_MODEL_DOWNLOAD_REQUIRED": {
+    "message": "model download required"
+  },
+  "reason_MODEL_UNAVAILABLE": {
+    "message": "model unavailable"
+  },
+  "reason_DETECTION_FAILED": {
+    "message": "language detection failed"
+  },
+  "reason_NO_SELECTION": {
+    "message": "no selection"
+  },
+  "reason_UNKNOWN": {
+    "message": "unexpected error"
+  },
+  "hudClose": {
+    "message": "Close (Esc)"
+  },
+  "hudLoadingLabel": {
+    "message": "QuickLens: translating"
+  },
+  "hudTranslating": {
+    "message": "Translating \"$ARG1$\" ($ARG2$)…",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      },
+      "arg2": {
+        "content": "$2"
+      }
+    }
+  },
+  "hudDownloadingModel": {
+    "message": "Downloading the on-device model… $ARG1$%",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      }
+    }
+  },
+  "hudTranslatingChunks": {
+    "message": "Translating long text… $ARG1$ / $ARG2$",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      },
+      "arg2": {
+        "content": "$2"
+      }
+    }
+  },
+  "hudResultLabel": {
+    "message": "QuickLens translation"
+  },
+  "hudFallbackNotice": {
+    "message": "$ARG1$ failed, so this was translated on-device instead (reason: $ARG2$).",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      },
+      "arg2": {
+        "content": "$2"
+      }
+    }
+  },
+  "hudAiFailedAlso": {
+    "message": "$ARG1$ failed (reason: $ARG2$), and on-device translation could not be used either.",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      },
+      "arg2": {
+        "content": "$2"
+      }
+    }
+  },
+  "hudToneNotSupported": {
+    "message": "$ARG1$ does not support this tone, so a standard translation is shown.",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      }
+    }
+  },
+  "hudCopy": {
+    "message": "Copy translation"
+  },
+  "hudCopyShort": {
+    "message": "Copy"
+  },
+  "hudCopied": {
+    "message": "Copied"
+  },
+  "hudCopyFailed": {
+    "message": "Copy failed"
+  },
+  "hudSpeak": {
+    "message": "Read aloud"
+  },
+  "hudOpenSettings": {
+    "message": "Open settings"
+  },
+  "hudRegisterKey": {
+    "message": "Register your own API key"
+  },
+  "hudDownloadAndContinue": {
+    "message": "Download model and translate"
+  },
+  "hudOriginal": {
+    "message": "Original"
+  },
+  "hudTarget": {
+    "message": "To: $ARG1$",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      }
+    }
+  },
+  "hudEscToClose": {
+    "message": "Esc to close"
+  },
+  "hudErrorLabel": {
+    "message": "QuickLens error"
+  },
+  "hudErrorTitle": {
+    "message": "Could not translate"
+  },
+  "hudSetupTitle": {
+    "message": "One-time setup"
+  },
+  "labelEngine": {
+    "message": "Translation engine"
+  },
+  "openSettings": {
+    "message": "Open settings"
+  },
+  "registerKey": {
+    "message": "Register key"
+  },
+  "engineNoKeyHint": {
+    "message": "No $ARG1$ key registered.",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      }
+    }
+  },
+  "labelTargetLang": {
+    "message": "Translate to"
+  },
+  "labelSourceLang": {
+    "message": "Translate from"
+  },
+  "sourceAuto": {
+    "message": "Detect automatically"
+  },
+  "moreLanguages": {
+    "message": "More…"
+  },
+  "labelTone": {
+    "message": "Tone"
+  },
+  "toneHintFree": {
+    "message": "Tones are available with AI engines (your own key)."
+  },
+  "labelSourceText": {
+    "message": "Text"
+  },
+  "clear": {
+    "message": "Clear"
+  },
+  "sourcePlaceholder": {
+    "message": "Select text on the page, or type here…"
+  },
+  "translateButton": {
+    "message": "Translate (Ctrl+Enter)"
+  },
+  "translatingButton": {
+    "message": "Translating…"
+  },
+  "resultTitle": {
+    "message": "Result"
+  },
+  "resultPlaceholder": {
+    "message": "Selected text on the page is picked up automatically."
+  },
+  "resultEmpty": {
+    "message": "Type or select some text."
+  },
+  "donatePromptLine": {
+    "message": "If QuickLens has been useful, your support would be appreciated."
+  },
+  "donateDismiss": {
+    "message": "Hide for now"
+  },
+  "optionsTitle": {
+    "message": "QuickLens settings"
+  },
+  "optionsLead": {
+    "message": "Changes are saved automatically."
+  },
+  "sectionTranslation": {
+    "message": "Translation"
+  },
+  "engineDesc": {
+    "message": "On-device translation works without a key. With your own key, text is sent to that AI provider."
+  },
+  "toneDesc": {
+    "message": "Tones apply to Gemini and OpenAI. DeepL supports Natural and Formal. On-device translation always uses Natural."
+  },
+  "sectionKeys": {
+    "message": "Your API keys (optional)"
+  },
+  "keysDesc": {
+    "message": "When you save a key, Chrome asks for permission to contact that provider. Removing a key also removes the permission."
+  },
+  "keyLabel_gemini": {
+    "message": "Google Gemini API key"
+  },
+  "keyLabel_openai": {
+    "message": "OpenAI API key"
+  },
+  "keyLabel_deepl": {
+    "message": "DeepL API key (Free keys end with :fx)"
+  },
+  "keySave": {
+    "message": "Save"
+  },
+  "keyRemove": {
+    "message": "Remove"
+  },
+  "keySaved": {
+    "message": "Saved on this device"
+  },
+  "keyNotSaved": {
+    "message": "Not registered"
+  },
+  "keyRemoved": {
+    "message": "Removed. Permission for this provider was also removed."
+  },
+  "keyEmpty": {
+    "message": "Enter a key first."
+  },
+  "keyPermissionDenied": {
+    "message": "Permission was not granted, so the key was not saved."
+  },
+  "keyGetLink": {
+    "message": "Get a key"
+  },
+  "keyProviderPrivacy": {
+    "message": "Provider privacy policy"
+  },
+  "sectionDisplay": {
+    "message": "Display"
+  },
+  "labelHudPosition": {
+    "message": "Translation card position"
+  },
+  "hudPosition_selection": {
+    "message": "Near the selection"
+  },
+  "hudPosition_corner": {
+    "message": "Bottom-right corner"
+  },
+  "labelTheme": {
+    "message": "Theme"
+  },
+  "theme_system": {
+    "message": "Match system"
+  },
+  "theme_light": {
+    "message": "Light"
+  },
+  "theme_dark": {
+    "message": "Dark"
+  },
+  "labelToastDuration": {
+    "message": "Close the card automatically after"
+  },
+  "duration_5": {
+    "message": "5 seconds"
+  },
+  "duration_10": {
+    "message": "10 seconds"
+  },
+  "duration_20": {
+    "message": "20 seconds"
+  },
+  "duration_manual": {
+    "message": "Keep open until closed"
+  },
+  "labelAutoTranslatePopup": {
+    "message": "Translate selected text automatically when the popup opens"
+  },
+  "sectionShortcut": {
+    "message": "Keyboard shortcut"
+  },
+  "shortcutCurrent": {
+    "message": "Translate selection:"
+  },
+  "shortcutNotSet": {
+    "message": "Not set"
+  },
+  "shortcutHowToChange": {
+    "message": "To change it, open Chrome's extension shortcut settings."
+  },
+  "shortcutOpenSettings": {
+    "message": "Open shortcut settings"
+  },
+  "sectionPrivacy": {
+    "message": "Privacy"
+  },
+  "privacyOnDevice": {
+    "message": "On-device translation runs inside Chrome on this device. The text is not sent anywhere for translation."
+  },
+  "privacyByok": {
+    "message": "If you choose Gemini, OpenAI or DeepL, the selected text is sent directly from your browser to that provider, using your own key, and is handled under that provider's policy."
+  },
+  "privacyKeys": {
+    "message": "Keys are stored only on this device and are not sent to the developer's server (the developer does not run any server)."
+  },
+  "privacyNoServer": {
+    "message": "Settings sync through your Chrome account. The translation count used for the support message stays on this device. No analytics are collected."
+  },
+  "sectionDonate": {
+    "message": "Support development"
+  },
+  "donateDesc": {
+    "message": "QuickLens is free with every feature available to everyone. If you find it useful, you can support its development."
+  },
+  "donateButton": {
+    "message": "Support QuickLens"
+  },
+  "resetSettings": {
+    "message": "Reset to defaults"
+  },
+  "resetConfirm": {
+    "message": "Reset all settings to their defaults? (API keys are kept.)"
+  },
+  "savedToast": {
+    "message": "Saved"
+  },
+  "onboardingTitle": {
+    "message": "Welcome to QuickLens"
+  },
+  "onboardingLead": {
+    "message": "Translate any text you select on a web page."
+  },
+  "onboardingHowTitle": {
+    "message": "Three ways to translate"
+  },
+  "howContextMenuTitle": {
+    "message": "Right-click"
+  },
+  "howContextMenuBody": {
+    "message": "Select text, right-click, and choose \"Translate with QuickLens\"."
+  },
+  "howShortcutTitle": {
+    "message": "Keyboard shortcut"
+  },
+  "howShortcutBody": {
+    "message": "Select text and press"
+  },
+  "howPopupTitle": {
+    "message": "Toolbar popup"
+  },
+  "howPopupBody": {
+    "message": "Click the QuickLens icon in the toolbar. Selected text is filled in, or type your own."
+  },
+  "onboardingEnginesTitle": {
+    "message": "Two kinds of engines"
+  },
+  "engineFreeExplain": {
+    "message": "Default. Uses Chrome's built-in translation model on this device. Free, no key, and the text stays on your device. The model is downloaded once per language pair."
+  },
+  "engineAiExplain": {
+    "message": "Optional. Register your own Gemini, OpenAI or DeepL key in Settings to use tones like Formal or Summary. The text is then sent to that provider."
+  },
+  "prepareModelButton": {
+    "message": "Download the on-device model now"
+  },
+  "preparing": {
+    "message": "Preparing…"
+  },
+  "prepareDone": {
+    "message": "Ready. On-device translation can be used."
+  },
+  "onboardingDonateLink": {
+    "message": "Support development"
+  }
+}
