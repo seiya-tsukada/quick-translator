@@ -19,8 +19,7 @@ test("AI provider domains are optional, not required", () => {
   assert.deepEqual([...manifest.optional_host_permissions].sort(), [
     "https://api-free.deepl.com/*",
     "https://api.deepl.com/*",
-    "https://api.openai.com/*",
-    "https://generativelanguage.googleapis.com/*"
+    "https://api.openai.com/*"
   ]);
 });
 

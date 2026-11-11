@@ -86,7 +86,7 @@
         await new Promise((r) => setTimeout(r, 500));
         switch (msg && msg.action) {
           case "QL_AI_TRANSLATE": return { ok: true, translatedText: fakeTranslate(msg.text, msg.targetLang) + (msg.tone ? `（${msg.tone}）` : "") };
-          case "QL_VAULT_GET_STATUS": return { ok: true, status: { gemini: true, openai: false, deepl: false } };
+          case "QL_VAULT_GET_STATUS": return { ok: true, status: { openai: true, deepl: false } };
           case "QL_OPEN_OPTIONS": return chromeMock.runtime.openOptionsPage();
           default: return { ok: true };
         }

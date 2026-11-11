@@ -23,26 +23,26 @@ export const TONES: ReadonlyArray<{ id: Tone; label: string }> = [
   { id: "breakdown", label: "🔍 解説" }
 ];
 
-export type Engine = "free" | "gemini" | "openai";
+export type Engine = "free" | "openai" | "deepl";
 
 export const DEFAULT_ENGINE: Engine = "free";
 
 export const ENGINE_BADGE_LABELS: Record<Engine, string> = {
   free: "端末内翻訳",
-  gemini: "Gemini AI",
-  openai: "OpenAI"
+  openai: "OpenAI",
+  deepl: "DeepL"
 };
 
 /** 金庫ドロワー内のエンジン選択チップ */
 export const ENGINE_CHIPS: ReadonlyArray<{ id: Engine; label: string; activeClassName: string }> = [
   { id: "free", label: "端末内翻訳 (キー不要)", activeClassName: "bg-cyan-950/60 border-cyan-500 text-cyan-300" },
-  { id: "gemini", label: "⚡ Gemini AI", activeClassName: "bg-purple-950/60 border-purple-500 text-purple-300" },
-  { id: "openai", label: "🧠 OpenAI", activeClassName: "bg-emerald-950/60 border-emerald-500 text-emerald-300" }
+  { id: "openai", label: "🧠 OpenAI", activeClassName: "bg-emerald-950/60 border-emerald-500 text-emerald-300" },
+  { id: "deepl", label: "🌐 DeepL", activeClassName: "bg-purple-950/60 border-purple-500 text-purple-300" }
 ];
 
 /** ポップアップ上部のエンジンバッジの配色 */
 export const ENGINE_BADGE_CLASS_NAMES: Record<Engine, string> = {
   free: "bg-slate-900 text-cyan-400 border-cyan-500/30",
-  gemini: "bg-purple-950/40 text-purple-300 border-purple-500/40",
-  openai: "bg-emerald-950/40 text-emerald-300 border-emerald-500/40"
+  openai: "bg-emerald-950/40 text-emerald-300 border-emerald-500/40",
+  deepl: "bg-purple-950/40 text-purple-300 border-purple-500/40"
 };

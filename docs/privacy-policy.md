@@ -22,14 +22,11 @@ QuickLens 翻訳（以下「本拡張機能」）の開発者は、サーバー�
 | エンジン | テキストの送信先 | 条件 |
 | --- | --- | --- |
 | 端末内翻訳（Chrome 組み込みの Translator API / Language Detector API） | 送信しません。この端末の Chrome の中で処理されます | 標準の設定 |
-| Google Gemini | Google（`generativelanguage.googleapis.com`） | 利用者が自分の API キーを登録し、Gemini を選んだ場合のみ |
 | OpenAI | OpenAI（`api.openai.com`） | 利用者が自分の API キーを登録し、OpenAI を選んだ場合のみ |
 | DeepL | DeepL（`api-free.deepl.com` または `api.deepl.com`） | 利用者が自分の API キーを登録し、DeepL を選んだ場合のみ |
 
 AI エンジンを選んだ場合、テキストは利用者のブラウザからその事業者へ直接送信され、利用者の API キーで認証されます。送信後のデータは各事業者のポリシーに従って扱われます。
 
-- Google Gemini API 利用規約: https://ai.google.dev/gemini-api/terms
-- Google プライバシーポリシー: https://policies.google.com/privacy
 - OpenAI プライバシーポリシー: https://openai.com/policies/privacy-policy/
 - DeepL プライバシーポリシー: https://www.deepl.com/privacy
 
@@ -50,7 +47,7 @@ AI エンジンが失敗した場合、本拡張機能は端末内翻訳で結�
 - `activeTab` / `scripting`: 右クリック・ショートカット・ポップアップの操作をしたときだけ、そのタブに翻訳カードを表示し、選択テキストを読み取るために使います。
 - `contextMenus`: 右クリックメニューに「QuickLens で翻訳」を追加します。
 - `storage`: 上記の設定・キー・回数を保存します。
-- 任意のホスト権限（Gemini / OpenAI / DeepL のドメイン）: 利用者がその事業者の API キーを保存したときにだけ許可を求めます。キーを削除すると許可も解除します。
+- 任意のホスト権限（OpenAI / DeepL のドメイン）: 利用者がその事業者の API キーを保存したときにだけ許可を求めます。キーを削除すると許可も解除します。
 
 ### 5. データの削除
 
@@ -77,14 +74,11 @@ What happens to the text you translate (text selected on a page, or typed in the
 | Engine | Where the text goes | When |
 | --- | --- | --- |
 | On-device (Chrome's built-in Translator API / Language Detector API) | Nowhere. It is processed inside Chrome on your device | Default |
-| Google Gemini | Google (`generativelanguage.googleapis.com`) | Only if you register your own API key and choose Gemini |
 | OpenAI | OpenAI (`api.openai.com`) | Only if you register your own API key and choose OpenAI |
 | DeepL | DeepL (`api-free.deepl.com` or `api.deepl.com`) | Only if you register your own API key and choose DeepL |
 
 With an AI engine, the text is sent directly from your browser to that provider and authenticated with your own key. The provider then handles it under its own policy:
 
-- Google Gemini API terms: https://ai.google.dev/gemini-api/terms
-- Google Privacy Policy: https://policies.google.com/privacy
 - OpenAI Privacy Policy: https://openai.com/policies/privacy-policy/
 - DeepL Privacy Policy: https://www.deepl.com/privacy
 
@@ -105,7 +99,7 @@ Translated text and results are not stored.
 - `activeTab` / `scripting`: used only when you use the right-click menu, the shortcut or the popup, to show the translation card in that tab and read the selected text.
 - `contextMenus`: adds "Translate with QuickLens" to the right-click menu.
 - `storage`: stores the settings, keys and counter described above.
-- Optional host permissions (Gemini / OpenAI / DeepL domains): requested only when you save a key for that provider, and removed when you delete the key.
+- Optional host permissions (OpenAI / DeepL domains): requested only when you save a key for that provider, and removed when you delete the key.
 
 ### 5. Deleting data
 

@@ -3,7 +3,7 @@
     "message": "QuickLens 翻訳"
   },
   "extDescription": {
-    "message": "選択テキストを右クリック・ショートカット・ポップアップで翻訳。標準は端末内で翻訳し、自分の Gemini / OpenAI / DeepL キーも使えます。"
+    "message": "選択テキストを右クリック・ショートカット・ポップアップで翻訳。標準は端末内で翻訳し、自分の OpenAI / DeepL キーも使えます。"
   },
   "actionTitle": {
     "message": "QuickLens 翻訳"
@@ -17,9 +17,6 @@
   "engine_free": {
     "message": "端末内翻訳"
   },
-  "engine_gemini": {
-    "message": "Gemini"
-  },
   "engine_openai": {
     "message": "OpenAI"
   },
@@ -28,9 +25,6 @@
   },
   "engineOption_free": {
     "message": "端末内翻訳（Chrome 組み込み・無料・キー不要）"
-  },
-  "engineOption_gemini": {
-    "message": "Google Gemini（自分の API キー）"
   },
   "engineOption_openai": {
     "message": "OpenAI（自分の API キー）"
@@ -325,16 +319,13 @@
     "message": "端末内翻訳はキーなしで使えます。自分のキーを登録した AI エンジンを選ぶと、テキストはその事業者に送信されます。"
   },
   "toneDesc": {
-    "message": "トーンは Gemini と OpenAI で有効です。DeepL は「自然な訳」と「ビジネス敬語」に対応します。端末内翻訳は常に「自然な訳」です。"
+    "message": "トーンは OpenAI で有効です。DeepL は「自然な訳」と「ビジネス敬語」に対応します。端末内翻訳は常に「自然な訳」です。"
   },
   "sectionKeys": {
     "message": "自分の API キー（任意）"
   },
   "keysDesc": {
     "message": "キーを保存すると、その事業者への接続許可を Chrome が確認します。キーを削除すると許可も解除されます。"
-  },
-  "keyLabel_gemini": {
-    "message": "Google Gemini の API キー"
   },
   "keyLabel_openai": {
     "message": "OpenAI の API キー"
@@ -433,7 +424,7 @@
     "message": "端末内翻訳は、この端末の Chrome の中で処理されます。翻訳のためにテキストを外部へ送信しません。"
   },
   "privacyByok": {
-    "message": "Gemini・OpenAI・DeepL を選んだ場合に限り、選択したテキストがあなたのキーでブラウザからその事業者へ直接送信され、各事業者のポリシーに従って扱われます。"
+    "message": "OpenAI・DeepL を選んだ場合に限り、選択したテキストがあなたのキーでブラウザからその事業者へ直接送信され、各事業者のポリシーに従って扱われます。"
   },
   "privacyKeys": {
     "message": "キーはこの端末にのみ保存され、開発者のサーバーには送信されません（開発者はサーバーを運営していません）。"
@@ -493,7 +484,7 @@
     "message": "標準のエンジンです。この端末の Chrome に組み込まれた翻訳モデルを使います。無料・キー不要で、テキストは端末の外に出ません。モデルは言語の組み合わせごとに初回だけダウンロードされます。"
   },
   "engineAiExplain": {
-    "message": "任意です。設定画面で自分の Gemini・OpenAI・DeepL のキーを登録すると、ビジネス敬語や要約などのトーンが使えます。その場合、テキストはその事業者に送信されます。"
+    "message": "任意です。設定画面で自分の OpenAI・DeepL のキーを登録すると、ビジネス敬語や要約などのトーンが使えます。その場合、テキストはその事業者に送信されます。"
   },
   "prepareModelButton": {
     "message": "端末内翻訳のモデルを今すぐ準備する"

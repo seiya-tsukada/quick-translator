@@ -20,10 +20,10 @@ const SECURITY_POINTS = [
     title: "2. 送信先はエンジンごとに明確",
     body: (
       <>
-        標準の端末内翻訳ではテキストを外部へ送信しません。自分のキーを登録して Gemini / OpenAI / DeepL を選んだ場合に限り、テキストがブラウザからその事業者の公式 API へ直接送信されます。
+        標準の端末内翻訳ではテキストを外部へ送信しません。自分のキーを登録して OpenAI / DeepL を選んだ場合に限り、テキストがブラウザからその事業者の公式 API へ直接送信されます。
       </>
     ),
-    code: <>Browser &rarr; https://generativelanguage.googleapis.com</>
+    code: <>Browser &rarr; https://api.openai.com</>
   },
   {
     icon: Layers,

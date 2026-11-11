@@ -28,7 +28,7 @@
 
   /**
    * @param {object} p
-   * @param {string} p.engine "free" | "gemini" | "openai" | "deepl"
+   * @param {string} p.engine "free" | "openai" | "deepl" (anything else is treated as "free")
    * @param {string} p.tone
    * @param {(tone: string) => Promise<{translatedText: string}>} p.aiTranslate
    * @param {() => Promise<{translatedText: string}>} p.freeTranslate

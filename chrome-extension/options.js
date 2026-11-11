@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const t = I18n.t;
   const $ = (id) => document.getElementById(id);
 
-  const settings = await chrome.storage.sync.get(DEFAULT_SETTINGS);
+  const settings = globalThis.QuickLensSettings.normalize(await chrome.storage.sync.get(DEFAULT_SETTINGS));
   Theme.applyToDocument(settings.theme);
   I18n.apply();
   Icons.hydrate();
@@ -88,7 +88,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const providersEl = $("providers");
   const template = $("provider-template");
-  const placeholders = { gemini: "AIza…", openai: "sk-…", deepl: "xxxxxxxx-…:fx" };
+  const placeholders = { openai: "sk-…", deepl: "xxxxxxxx-…:fx" };
 
   async function refreshKeyStatus(provider, statusEl, message, isError) {
     const status = await Vault.getApiKeyStatus();

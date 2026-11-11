@@ -51,7 +51,7 @@
 
   /**
    * Classify an HTTP error response from an AI provider.
-   * @param {"gemini"|"openai"|"deepl"} provider
+   * @param {"openai"|"deepl"} provider
    * @param {number} status
    * @param {string} bodyText raw response body (may be JSON)
    */
@@ -70,7 +70,6 @@
     if (status === 402) return new QuickLensError(CODES.QUOTA, detail);
     if (status === 413 || status === 414) return new QuickLensError(CODES.TOO_LONG, detail);
     if (status === 400) {
-      if (lower.includes("api_key_invalid") || lower.includes("api key not valid")) return new QuickLensError(CODES.AUTH, detail);
       if (lower.includes("context_length") || lower.includes("too long") || lower.includes("maximum context")) {
         return new QuickLensError(CODES.TOO_LONG, detail);
       }

@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const t = I18n.t;
   const $ = (id) => document.getElementById(id);
 
-  const settings = await chrome.storage.sync.get(DEFAULT_SETTINGS);
+  const settings = globalThis.QuickLensSettings.normalize(await chrome.storage.sync.get(DEFAULT_SETTINGS));
   globalThis.QuickLensTheme.applyToDocument(settings.theme);
   I18n.apply();
   globalThis.QuickLensIcons.hydrate();

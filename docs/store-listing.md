@@ -11,8 +11,8 @@
 
 `_locales/*/messages.json` の `extDescription` と同じです。
 
-- ja: 選択テキストを右クリック・ショートカット・ポップアップで翻訳。標準は端末内で翻訳し、自分の Gemini / OpenAI / DeepL キーも使えます。
-- en: Translate selected text via right-click, shortcut or popup. On-device by default, or use your own Gemini/OpenAI/DeepL key.
+- ja: 選択テキストを右クリック・ショートカット・ポップアップで翻訳。標準は端末内で翻訳し、自分の OpenAI / DeepL キーも使えます。
+- en: Translate selected text via right-click, shortcut or popup. On-device by default, or use your own OpenAI/DeepL key.
 
 ## 詳しい説明 / Description
 
@@ -27,7 +27,7 @@ Web ページで選んだテキストを、その場で翻訳する拡張機能�
 
 翻訳エンジン
 - 端末内翻訳（標準）：Chrome に組み込まれた翻訳機能を使います。無料・キー不要で、テキストは端末の外に出ません。デスクトップ版 Chrome 138 以降が必要で、言語の組み合わせごとに初回だけモデルをダウンロードします。
-- 自分のキーで AI 翻訳（任意）：Google Gemini、OpenAI、DeepL の API キーを登録すると、ビジネス敬語・要約・解説つきなどのトーンを使えます。テキストはその事業者に直接送信されます。
+- 自分のキーで AI 翻訳（任意）：OpenAI、DeepL の API キーを登録すると、ビジネス敬語・要約・解説つきなどのトーンを使えます。テキストはその事業者に直接送信されます。
 
 その他
 - 翻訳カードは選択範囲の近く、または右下に表示（設定で切り替え）
@@ -52,7 +52,7 @@ Three ways to use it:
 
 Engines
 - On-device (default): uses Chrome's built-in translation. Free, no key, and the text stays on your device. Requires desktop Chrome 138 or later; the model for each language pair is downloaded once.
-- AI with your own key (optional): register a Google Gemini, OpenAI or DeepL API key to use tones such as Formal, Summary or With notes. The text is then sent directly to that provider.
+- AI with your own key (optional): register an OpenAI or DeepL API key to use tones such as Formal, Summary or With notes. The text is then sent directly to that provider.
 
 Also
 - Translation card near the selection or in the bottom-right corner
@@ -79,7 +79,7 @@ Every feature is free for everyone.
 | `scripting` | `activeTab` で許可されたタブに、翻訳カードのスクリプトを必要なときだけ注入するため。 | To inject the translation-card script into the tab granted by `activeTab`, only when needed. |
 | `contextMenus` | 選択テキストの右クリックメニューに「QuickLens で翻訳」を追加するため。 | To add "Translate with QuickLens" to the context menu for selected text. |
 | `storage` | 設定（同期）、利用者の API キー（端末内のみ）、応援メッセージ表示判定用の翻訳回数（端末内のみ）を保存するため。 | To store settings (synced), the user's API keys (local only) and a local translation counter used only for the support message. |
-| 任意のホスト権限 / Optional host permissions: `generativelanguage.googleapis.com`, `api.openai.com`, `api-free.deepl.com`, `api.deepl.com` | 利用者が自分の API キーを保存したときにだけ許可を求め、その事業者の公式 API に翻訳を依頼するため。キー削除時に解除します。 | Requested only when the user saves their own API key, to call that provider's official API. Removed when the key is deleted. |
+| 任意のホスト権限 / Optional host permissions: `api.openai.com`, `api-free.deepl.com`, `api.deepl.com` | 利用者が自分の API キーを保存したときにだけ許可を求め、その事業者の公式 API に翻訳を依頼するため。キー削除時に解除します。 | Requested only when the user saves their own API key, to call that provider's official API. Removed when the key is deleted. |
 
 リモートコード / Remote code: 使用しません。すべてのスクリプトはパッケージに含まれます。 / None. All scripts are bundled in the package.
 

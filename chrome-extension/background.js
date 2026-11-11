@@ -23,12 +23,40 @@ const {
   COMMAND_TRANSLATE,
   ACTIONS,
   AI_ENGINES,
+  REMOVED_ENGINES,
   PROVIDER_ORIGINS,
   CONTENT_SCRIPT_FILES
 } = self.QUICKLENS_CONFIG;
 const { CODES, QuickLensError, toPlain } = self.QuickLensErrors;
 
 // ---------- Install / startup ----------
+
+/**
+ * Engine to switch to when the stored engine was removed (e.g. "gemini"):
+ * the first remaining AI engine the user already has a key and permission for, else on-device.
+ */
+async function pickFallbackEngine() {
+  try {
+    const status = await self.VaultCrypto.getApiKeyStatus();
+    for (const engine of AI_ENGINES) {
+      if (status[engine] && (await hasProviderPermission(engine))) return engine;
+    }
+  } catch (err) {
+    console.warn("[QuickLens] Could not check saved keys for fallback:", err && err.message);
+  }
+  return DEFAULT_SETTINGS.engine;
+}
+
+/** Delete keys saved for engines that no longer exist, so they don't linger on the device. */
+async function purgeRemovedEngineKeys() {
+  for (const engine of REMOVED_ENGINES) {
+    try {
+      await self.VaultCrypto.removeApiKey(engine);
+    } catch (err) {
+      console.warn(`[QuickLens] Could not remove the ${engine} key:`, err && err.message);
+    }
+  }
+}
 
 chrome.runtime.onInstalled.addListener(async (details) => {
   // Fill in defaults without overwriting the user's existing values; drop obsolete keys.
@@ -37,8 +65,10 @@ chrome.runtime.onInstalled.addListener(async (details) => {
   Object.keys(DEFAULT_SETTINGS).forEach((k) => {
     if (current[k] !== undefined) merged[k] = current[k];
   });
-  await chrome.storage.sync.set(merged);
+  if (REMOVED_ENGINES.includes(merged.engine)) merged.engine = await pickFallbackEngine();
+  await chrome.storage.sync.set(self.QuickLensSettings.normalize(merged));
   if (current.position !== undefined) await chrome.storage.sync.remove("position");
+  await purgeRemovedEngineKeys();
 
   chrome.contextMenus.removeAll(() => {
     chrome.contextMenus.create({

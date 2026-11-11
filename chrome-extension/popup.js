@@ -36,11 +36,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   const copyBtn = $("copy-btn");
   const copyLabel = $("copy-label");
 
-  const settings = await chrome.storage.sync.get(DEFAULT_SETTINGS);
+  const settings = globalThis.QuickLensSettings.normalize(await chrome.storage.sync.get(DEFAULT_SETTINGS));
   Theme.applyToDocument(settings.theme);
   I18n.apply();
 
-  let keyStatus = { gemini: false, openai: false, deepl: false };
+  let keyStatus = { openai: false, deepl: false };
   let output = "";
   let running = false;
 
