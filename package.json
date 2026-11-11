@@ -11,7 +11,8 @@
     "lint": "tsc --noEmit && eslint .",
     "icons": "tsx generate-icons.ts",
     "test": "node --test tests/",
-    "zip:extension": "node scripts/zip-extension.mjs"
+    "zip:extension": "node scripts/zip-extension.mjs",
+    "mock": "node mock/server.mjs"
   },
   "dependencies": {
     "jszip": "^3.10.2",

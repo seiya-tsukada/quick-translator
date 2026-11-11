@@ -54,6 +54,7 @@ npm install
 npm test               # ユニットテスト
 npm run lint           # tsc --noEmit + ESLint
 npm run zip:extension  # dist/quicklens-translator-v<version>.zip を作成
+npm run mock           # http://localhost:3100 で拡張の画面をモック表示（chrome.* API と翻訳はダミー）
 ```
 
 ### リリース
