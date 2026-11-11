@@ -1,5 +1,5 @@
 /**
- * QuickLens - AI engines using the user's own API key (BYOK): Gemini, OpenAI, DeepL.
+ * QuickLens - AI engines using the user's own API key (BYOK): OpenAI, DeepL.
  * Loaded only by the background service worker. Requests go directly from the browser
  * to the provider the user registered a key for. There is no developer-run server.
  */
@@ -58,46 +58,6 @@
     return res.json();
   }
 
-  // ---------- Gemini ----------
-
-  function geminiThinkingConfig(model) {
-    // Gemini 2.5 uses thinkingBudget; Gemini 3+ uses thinkingLevel (using it on 2.5 is an error).
-    if (/^gemini-2\.5/.test(model)) return { thinkingBudget: API.GEMINI_25_THINKING_BUDGET };
-    return { thinkingLevel: API.GEMINI_THINKING_LEVEL };
-  }
-
-  function buildGeminiRequest({ text, sourceLang, targetLang, tone, model = API.GEMINI_MODEL }) {
-    return {
-      url: `${API.GEMINI_BASE_URL}/${encodeURIComponent(model)}:generateContent`,
-      body: {
-        systemInstruction: { parts: [{ text: buildSystemPrompt({ sourceLang, targetLang, tone }) }] },
-        contents: [{ role: "user", parts: [{ text }] }],
-        generationConfig: {
-          temperature: API.TEMPERATURE,
-          maxOutputTokens: API.GEMINI_MAX_OUTPUT_TOKENS,
-          thinkingConfig: geminiThinkingConfig(model)
-        }
-      }
-    };
-  }
-
-  async function translateViaGemini({ text, sourceLang, targetLang, tone, apiKey, fetchImpl = fetch }) {
-    assertLength(text);
-    const { url, body } = buildGeminiRequest({ text, sourceLang, targetLang, tone });
-    // Key goes in the x-goog-api-key header, never in the URL.
-    const data = await postJson("gemini", url, { "x-goog-api-key": apiKey }, body, fetchImpl);
-    const candidate = data.candidates && data.candidates[0];
-    if (!candidate) {
-      const block = data.promptFeedback && data.promptFeedback.blockReason;
-      throw new QuickLensError(CODES.UNKNOWN, block ? `blocked: ${block}` : "no candidates");
-    }
-    const parts = (candidate.content && candidate.content.parts) || [];
-    const output = parts.filter((p) => !p.thought && typeof p.text === "string").map((p) => p.text).join("").trim();
-    if (candidate.finishReason === "MAX_TOKENS") throw new QuickLensError(CODES.TOO_LONG, "MAX_TOKENS");
-    if (!output) throw new QuickLensError(CODES.UNKNOWN, `finishReason: ${candidate.finishReason || "none"}`);
-    return { translatedText: output };
-  }
-
   // ---------- OpenAI ----------
 
   function buildOpenAIRequest({ text, sourceLang, targetLang, tone, model = API.OPENAI_MODEL }) {
@@ -151,7 +111,6 @@
   }
 
   const ENGINES = {
-    gemini: translateViaGemini,
     openai: translateViaOpenAI,
     deepl: translateViaDeepL
   };
@@ -159,7 +118,6 @@
   globalThis.QuickLensAI = Object.freeze({
     ENGINES,
     buildSystemPrompt,
-    buildGeminiRequest,
     buildOpenAIRequest,
     buildDeepLRequest,
     deeplEndpoint,

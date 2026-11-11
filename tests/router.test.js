@@ -21,12 +21,12 @@ test("free engine uses on-device translation only", async () => {
 test("AI engine success returns AI result and applied tone", async () => {
   let toneSeen;
   const r = await runTranslation({
-    engine: "gemini", tone: "business",
+    engine: "openai", tone: "business",
     aiTranslate: async (tone) => { toneSeen = tone; return { translatedText: "AI" }; },
     freeTranslate: ok("FREE")
   });
   assert.equal(r.translatedText, "AI");
-  assert.equal(r.engineUsed, "gemini");
+  assert.equal(r.engineUsed, "openai");
   assert.equal(toneSeen, "business");
   assert.equal(r.fallback, null);
 });
@@ -48,10 +48,10 @@ test("non-QuickLens errors are reported as UNKNOWN", async () => {
 
 test("when both fail, the on-device error is thrown with the AI failure attached", async () => {
   await assert.rejects(
-    runTranslation({ engine: "gemini", tone: "natural", aiTranslate: fail(CODES.AUTH), freeTranslate: fail(CODES.BUILTIN_UNAVAILABLE) }),
+    runTranslation({ engine: "openai", tone: "natural", aiTranslate: fail(CODES.AUTH), freeTranslate: fail(CODES.BUILTIN_UNAVAILABLE) }),
     (err) => {
       assert.equal(err.code, CODES.BUILTIN_UNAVAILABLE);
-      assert.equal(err.aiFailure.from, "gemini");
+      assert.equal(err.aiFailure.from, "openai");
       assert.equal(err.aiFailure.reason, CODES.AUTH);
       return true;
     }
@@ -77,4 +77,26 @@ test("DeepL cannot summarise: tone is downgraded and flagged", async () => {
   assert.equal(effectiveTone("deepl", "business"), "business");
   assert.equal(effectiveTone("free", "business"), "natural");
   assert.equal(effectiveTone("openai", "breakdown"), "breakdown");
+});
+
+test("removed engine (legacy \"gemini\" setting) falls back to on-device without calling AI", async () => {
+  let aiCalled = false;
+  const r = await runTranslation({ engine: "gemini", tone: "business", aiTranslate: async () => { aiCalled = true; return { translatedText: "AI" }; }, freeTranslate: ok("FREE") });
+  assert.equal(aiCalled, false);
+  assert.equal(r.engineUsed, "free");
+  assert.equal(r.translatedText, "FREE");
+  assert.equal(r.tone, "natural");
+});
+
+test("stored settings are normalised: removed engine / unknown tone fall back to defaults", () => {
+  const { normalize } = g.QuickLensSettings;
+  const { DEFAULT_SETTINGS, REMOVED_ENGINES, ENGINES } = g.QUICKLENS_CONFIG;
+  assert.ok(REMOVED_ENGINES.includes("gemini"));
+  assert.ok(!ENGINES.includes("gemini"));
+  const n = normalize({ engine: "gemini", tone: "poetic", targetLang: "en" });
+  assert.equal(n.engine, DEFAULT_SETTINGS.engine);
+  assert.equal(n.tone, DEFAULT_SETTINGS.tone);
+  assert.equal(n.targetLang, "en");
+  assert.equal(normalize({ engine: "deepl", tone: "business" }).engine, "deepl");
+  assert.equal(normalize(undefined).engine, DEFAULT_SETTINGS.engine);
 });

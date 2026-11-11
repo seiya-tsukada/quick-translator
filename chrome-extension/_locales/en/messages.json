@@ -3,7 +3,7 @@
     "message": "QuickLens Translator"
   },
   "extDescription": {
-    "message": "Translate selected text via right-click, shortcut or popup. On-device by default, or use your own Gemini/OpenAI/DeepL key."
+    "message": "Translate selected text via right-click, shortcut or popup. On-device by default, or use your own OpenAI/DeepL key."
   },
   "actionTitle": {
     "message": "QuickLens Translator"
@@ -17,9 +17,6 @@
   "engine_free": {
     "message": "On-device"
   },
-  "engine_gemini": {
-    "message": "Gemini"
-  },
   "engine_openai": {
     "message": "OpenAI"
   },
@@ -28,9 +25,6 @@
   },
   "engineOption_free": {
     "message": "On-device (Chrome built-in, free, no key)"
-  },
-  "engineOption_gemini": {
-    "message": "Google Gemini (your own API key)"
   },
   "engineOption_openai": {
     "message": "OpenAI (your own API key)"
@@ -325,16 +319,13 @@
     "message": "On-device translation works without a key. With your own key, text is sent to that AI provider."
   },
   "toneDesc": {
-    "message": "Tones apply to Gemini and OpenAI. DeepL supports Natural and Formal. On-device translation always uses Natural."
+    "message": "Tones apply to OpenAI. DeepL supports Natural and Formal. On-device translation always uses Natural."
   },
   "sectionKeys": {
     "message": "Your API keys (optional)"
   },
   "keysDesc": {
     "message": "When you save a key, Chrome asks for permission to contact that provider. Removing a key also removes the permission."
-  },
-  "keyLabel_gemini": {
-    "message": "Google Gemini API key"
   },
   "keyLabel_openai": {
     "message": "OpenAI API key"
@@ -433,7 +424,7 @@
     "message": "On-device translation runs inside Chrome on this device. The text is not sent anywhere for translation."
   },
   "privacyByok": {
-    "message": "If you choose Gemini, OpenAI or DeepL, the selected text is sent directly from your browser to that provider, using your own key, and is handled under that provider's policy."
+    "message": "If you choose OpenAI or DeepL, the selected text is sent directly from your browser to that provider, using your own key, and is handled under that provider's policy."
   },
   "privacyKeys": {
     "message": "Keys are stored only on this device and are not sent to the developer's server (the developer does not run any server)."
@@ -493,7 +484,7 @@
     "message": "Default. Uses Chrome's built-in translation model on this device. Free, no key, and the text stays on your device. The model is downloaded once per language pair."
   },
   "engineAiExplain": {
-    "message": "Optional. Register your own Gemini, OpenAI or DeepL key in Settings to use tones like Formal or Summary. The text is then sent to that provider."
+    "message": "Optional. Register your own OpenAI or DeepL key in Settings to use tones like Formal or Summary. The text is then sent to that provider."
   },
   "prepareModelButton": {
     "message": "Download the on-device model now"

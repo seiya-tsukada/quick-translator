@@ -117,7 +117,7 @@
 
   async function loadSettings() {
     try {
-      return await chrome.storage.sync.get(DEFAULT_SETTINGS);
+      return globalThis.QuickLensSettings.normalize(await chrome.storage.sync.get(DEFAULT_SETTINGS));
     } catch (_e) {
       return { ...DEFAULT_SETTINGS };
     }

@@ -59,14 +59,14 @@ export default function FocusLensPopup({ sim }: { sim: SimulatorState }) {
             <div className="space-y-2 mb-2">
               <div>
                 <label className="text-[11px] font-medium text-slate-300 block mb-1">
-                  Google Gemini API Key:
+                  OpenAI API Key:
                 </label>
                 <div className="flex gap-1.5">
                   <input
                     type="password"
                     value={sim.simulatedApiKey}
                     onChange={(e) => sim.setSimulatedApiKey(e.target.value)}
-                    placeholder="AIzaSy... (空欄で削除)"
+                    placeholder="sk-... (空欄で削除)"
                     className="flex-1 bg-slate-950 border border-slate-700 rounded-md px-2 py-1 text-xs text-white font-mono"
                   />
                   <button

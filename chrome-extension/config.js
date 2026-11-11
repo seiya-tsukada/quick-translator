@@ -17,7 +17,7 @@
   globalThis.QUICKLENS_CONFIG = freezeDeep({
     // Initial values of user settings stored in chrome.storage.sync
     DEFAULT_SETTINGS: {
-      engine: "free", // "free" | "gemini" | "openai" | "deepl"
+      engine: "free", // "free" | "openai" | "deepl"
       tone: "natural", // "natural" | "business" | "summary" | "breakdown"
       targetLang: "ja",
       sourceLang: "auto",
@@ -27,14 +27,16 @@
       theme: "system" // "system" | "light" | "dark"
     },
 
-    ENGINES: ["free", "gemini", "openai", "deepl"],
-    AI_ENGINES: ["gemini", "openai", "deepl"],
+    ENGINES: ["free", "openai", "deepl"],
+    AI_ENGINES: ["openai", "deepl"],
+    // Engines that existed in earlier versions. A stored value pointing at one of these is
+    // migrated on update (background.js) and normalised to a supported engine on every read.
+    REMOVED_ENGINES: ["gemini"],
     TONES: ["natural", "business", "summary", "breakdown"],
 
     // Which tones each engine can honour. Others are disabled in the UI.
     ENGINE_TONES: {
       free: ["natural"],
-      gemini: ["natural", "business", "summary", "breakdown"],
       openai: ["natural", "business", "summary", "breakdown"],
       deepl: ["natural", "business"]
     },
@@ -104,14 +106,6 @@
       AI_MAX_INPUT_CHARS: 20000,
       TEMPERATURE: 0.3,
 
-      GEMINI_BASE_URL: "https://generativelanguage.googleapis.com/v1beta/models",
-      // gemini-2.5-flash is deprecated (requests auto-route to 3.5 Flash-Lite from 2026-12-01).
-      GEMINI_MODEL: "gemini-3.5-flash-lite",
-      GEMINI_MAX_OUTPUT_TOKENS: 8192,
-      // Gemini 3+: thinkingLevel. Gemini 2.5: thinkingBudget (thinkingLevel errors on 2.5).
-      GEMINI_THINKING_LEVEL: "MINIMAL",
-      GEMINI_25_THINKING_BUDGET: 0,
-
       OPENAI_CHAT_URL: "https://api.openai.com/v1/chat/completions",
       OPENAI_MODEL: "gpt-6-luna",
       OPENAI_MAX_COMPLETION_TOKENS: 8192,
@@ -124,13 +118,11 @@
 
     // Origins requested via optional_host_permissions when a key is saved
     PROVIDER_ORIGINS: {
-      gemini: ["https://generativelanguage.googleapis.com/*"],
       openai: ["https://api.openai.com/*"],
       deepl: ["https://api-free.deepl.com/*", "https://api.deepl.com/*"]
     },
 
     PROVIDER_LINKS: {
-      gemini: { keys: "https://aistudio.google.com/apikey", privacy: "https://ai.google.dev/gemini-api/terms" },
       openai: { keys: "https://platform.openai.com/api-keys", privacy: "https://openai.com/policies/privacy-policy/" },
       deepl: { keys: "https://www.deepl.com/your-account/keys", privacy: "https://www.deepl.com/privacy" }
     },
@@ -185,4 +177,17 @@
       ESTIMATED_HEIGHT: 220
     }
   });
+
+  /**
+   * Coerce stored settings into values this version supports. Anything unknown (e.g. the
+   * removed "gemini" engine, or a tone that no longer exists) falls back to the default.
+   */
+  const { DEFAULT_SETTINGS, ENGINES, TONES } = globalThis.QUICKLENS_CONFIG;
+  function normalizeSettings(settings) {
+    const out = { ...DEFAULT_SETTINGS, ...(settings || {}) };
+    if (!ENGINES.includes(out.engine)) out.engine = DEFAULT_SETTINGS.engine;
+    if (!TONES.includes(out.tone)) out.tone = DEFAULT_SETTINGS.tone;
+    return out;
+  }
+  globalThis.QuickLensSettings = Object.freeze({ normalize: normalizeSettings });
 })();

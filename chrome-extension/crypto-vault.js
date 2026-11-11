@@ -54,7 +54,7 @@ async function deriveVaultKey() {
 
 /**
  * APIキーをAES-GCMで暗号化してchrome.storage.localに保存
- * @param {string} provider - 'gemini' | 'openai' | 'deepl'
+ * @param {string} provider - 'openai' | 'deepl'
  * @param {string} apiKey - 平文のAPIキー
  */
 async function saveEncryptedApiKey(provider, apiKey) {
@@ -89,7 +89,7 @@ async function saveEncryptedApiKey(provider, apiKey) {
 
 /**
  * 暗号化されたAPIキーを復号して取得（メモリ上でのみ保持・即時利用用）
- * @param {string} provider - 'gemini' | 'openai' | 'deepl'
+ * @param {string} provider - 'openai' | 'deepl'
  * @returns {Promise<string | null>}
  */
 async function getDecryptedApiKey(provider) {
@@ -120,12 +120,12 @@ async function getDecryptedApiKey(provider) {
 
 /**
  * 鍵が登録されているかどうかの状態のみを取得（平文は返さない）
- * @returns {Promise<{gemini: boolean, openai: boolean, deepl: boolean}>}
+ * @returns {Promise<{openai: boolean, deepl: boolean}>}
  */
 async function getApiKeyStatus() {
   const existing = await getEncryptedVault();
   const has = (p) => Boolean(existing[p] && existing[p].ciphertext);
-  return { gemini: has("gemini"), openai: has("openai"), deepl: has("deepl") };
+  return { openai: has("openai"), deepl: has("deepl") };
 }
 
 async function removeApiKey(provider) {

@@ -59,7 +59,7 @@ export function useSimulator() {
 
   const saveSimulatedKey = () => {
     setSavedKeyMessage(STATUS_TEXT.KEY_SAVED);
-    setSelectedEngine("gemini");
+    setSelectedEngine("openai");
     setTimeout(() => setSavedKeyMessage(null), FEEDBACK_DURATION.KEY_SAVED);
   };
 

@@ -60,7 +60,7 @@ const FILE_META: Record<string, { role: string; description: string }> = {
     role: "端末内翻訳（Translator / Language Detector API）",
     description: "モデルの状態確認・ダウンロード進捗・言語判定・長文分割をまとめた Chrome 組み込み翻訳のラッパーです。"
   },
-  "lib/ai-engines.js": { role: "AI エンジン（Gemini / OpenAI / DeepL）", description: "ユーザー自身のキーで各事業者の公式 API を呼び出します。" },
+  "lib/ai-engines.js": { role: "AI エンジン（OpenAI / DeepL）", description: "ユーザー自身のキーで各事業者の公式 API を呼び出します。" },
   "lib/router.js": { role: "翻訳ルーター", description: "エンジンを選び、AI が失敗したときは理由つきで端末内翻訳に切り替えます。" }
 };
 

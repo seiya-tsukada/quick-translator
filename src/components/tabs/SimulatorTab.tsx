@@ -14,7 +14,7 @@ const HIGHLIGHTS = [
     icon: Lock,
     iconClassName: "bg-purple-500/10 text-purple-400",
     title: "標準は端末内翻訳",
-    body: <>標準は Chrome 組み込みの端末内翻訳（無料・キー不要）。自分の Gemini / OpenAI / DeepL キーを登録すると、その事業者の公式 API を使えます。</>
+    body: <>標準は Chrome 組み込みの端末内翻訳（無料・キー不要）。自分の OpenAI / DeepL キーを登録すると、その事業者の公式 API を使えます。</>
   },
   {
     icon: Layers,
