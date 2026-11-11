@@ -1,45 +1,42 @@
 {
   "manifest_version": 3,
-  "name": "QuickLens 翻訳 (Focus Lens Translator)",
-  "version": "1.1.0",
-  "description": "Gmail・GitHub等の特殊環境にも完全対応。選択テキストを瞬時に読み解くフォーカス・レンズ翻訳（無料・キー不要＆マイAIキー登録両対応）",
+  "name": "__MSG_extName__",
+  "short_name": "QuickLens",
+  "version": "2.0.0",
+  "description": "__MSG_extDescription__",
+  "default_locale": "en",
   "permissions": [
     "contextMenus",
     "storage",
     "activeTab",
     "scripting"
   ],
-  "host_permissions": [
-    "https://translate.googleapis.com/*",
+  "optional_host_permissions": [
     "https://generativelanguage.googleapis.com/*",
-    "https://api.openai.com/*"
+    "https://api.openai.com/*",
+    "https://api-free.deepl.com/*",
+    "https://api.deepl.com/*"
   ],
   "background": {
     "service_worker": "background.js"
   },
   "action": {
     "default_popup": "popup.html",
-    "default_title": "QuickLens 翻訳",
+    "default_title": "__MSG_actionTitle__",
     "default_icon": {
       "16": "icons/icon16.png",
       "48": "icons/icon48.png",
       "128": "icons/icon128.png"
     }
   },
-  "content_scripts": [
-    {
-      "matches": [
-        "<all_urls>"
-      ],
-      "js": [
-        "config.js",
-        "content.js"
-      ],
-      "all_frames": true,
-      "match_about_blank": true,
-      "run_at": "document_idle"
+  "commands": {
+    "translate-selection": {
+      "suggested_key": {
+        "default": "Alt+T"
+      },
+      "description": "__MSG_commandTranslateDescription__"
     }
-  ],
+  },
   "options_ui": {
     "page": "options.html",
     "open_in_tab": true

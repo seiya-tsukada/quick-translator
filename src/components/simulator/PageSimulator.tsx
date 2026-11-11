@@ -138,7 +138,7 @@ function GmailPage({ selectedWebText }: { selectedWebText: string }) {
             {selectedWebText}
           </div>
           <p className="text-[11px] text-slate-400">
-            💡 <strong>Gmail環境での耐性検証:</strong> Gmailのメール本文は動的iframeやcontenteditable内に描画されます。QuickLensは <code>all_frames: true</code> と多層テキスト抽出により、入れ子になったiframe内からも確実にテキストを読み取ります。
+            💡 <strong>Gmail について:</strong> 右クリックメニューはブラウザが選択テキストを渡すため、iframe 内でも翻訳できます。ショートカットとポップアップは、拡張機能がアクセスできるフレームからのみ選択テキストを読み取ります。
           </p>
         </div>
       </div>

@@ -48,12 +48,12 @@ export default function FocusLensPopup({ sim }: { sim: SimulatorState }) {
             <div className="flex items-center justify-between mb-1.5 text-xs font-bold text-purple-400">
               <span className="flex items-center gap-1">
                 <Lock className="w-3.5 h-3.5" />
-                <span>セキュア・暗号化金庫 (AES-GCM 256bit)</span>
+                <span>自分の API キー（この端末にのみ保存）</span>
               </span>
               <span className="text-[10px] text-slate-400 font-normal">端末内完結</span>
             </div>
             <p className="text-[11px] text-slate-400 leading-relaxed mb-2.5">
-              ユーザー登録不要。登録されたキーは端末内暗号化され、公式エンドポイントへ直接送信されます。
+              キーはこの端末にのみ保存され、開発者のサーバーには送信されません。
             </p>
 
             <div className="space-y-2 mb-2">

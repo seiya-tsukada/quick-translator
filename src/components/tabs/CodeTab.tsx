@@ -17,7 +17,7 @@ export default function CodeTab({ activeFileIndex, onSelectFile, copiedFileName,
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-900 border border-slate-800 rounded-xl p-4">
         <div>
-          <h2 className="font-bold text-white text-base">拡張機能 完全ソースコード</h2>
+          <h2 className="font-bold text-white text-base">拡張機能のソースコード</h2>
           <p className="text-xs text-slate-400 mt-0.5">
             省略なし・コピペでそのまま動作する最新の全ファイルです。
           </p>

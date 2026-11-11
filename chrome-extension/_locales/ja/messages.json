@@ -1,0 +1,510 @@
+{
+  "extName": {
+    "message": "QuickLens 翻訳"
+  },
+  "extDescription": {
+    "message": "選択テキストを右クリック・ショートカット・ポップアップで翻訳。標準は端末内で翻訳し、自分の Gemini / OpenAI / DeepL キーも使えます。"
+  },
+  "actionTitle": {
+    "message": "QuickLens 翻訳"
+  },
+  "commandTranslateDescription": {
+    "message": "選択したテキストを翻訳"
+  },
+  "contextMenuTitle": {
+    "message": "QuickLens で翻訳（「%s」）"
+  },
+  "engine_free": {
+    "message": "端末内翻訳"
+  },
+  "engine_gemini": {
+    "message": "Gemini"
+  },
+  "engine_openai": {
+    "message": "OpenAI"
+  },
+  "engine_deepl": {
+    "message": "DeepL"
+  },
+  "engineOption_free": {
+    "message": "端末内翻訳（Chrome 組み込み・無料・キー不要）"
+  },
+  "engineOption_gemini": {
+    "message": "Google Gemini（自分の API キー）"
+  },
+  "engineOption_openai": {
+    "message": "OpenAI（自分の API キー）"
+  },
+  "engineOption_deepl": {
+    "message": "DeepL（自分の API キー）"
+  },
+  "engineAiTag": {
+    "message": "AI エンジン（自分のキー）"
+  },
+  "tone_natural": {
+    "message": "自然な訳"
+  },
+  "tone_business": {
+    "message": "ビジネス敬語"
+  },
+  "tone_summary": {
+    "message": "要約"
+  },
+  "tone_breakdown": {
+    "message": "解説つき"
+  },
+  "error_AUTH": {
+    "message": "API キーが認証されませんでした。キーが正しいか、有効期限が切れていないか確認してください。"
+  },
+  "error_QUOTA": {
+    "message": "API の利用上限またはレート制限に達しました。しばらく待つか、ご利用のプランを確認してください。"
+  },
+  "error_NETWORK": {
+    "message": "サービスに接続できませんでした。ネットワーク接続を確認して、もう一度お試しください。"
+  },
+  "error_TOO_LONG": {
+    "message": "テキストが長すぎるため、このエンジンでは翻訳できません。短く区切って選択してください。"
+  },
+  "error_UNSUPPORTED_LANG": {
+    "message": "選択中のエンジンはこの言語の組み合わせに対応していません。"
+  },
+  "error_NO_KEY": {
+    "message": "選択中のエンジンの API キーが登録されていません。"
+  },
+  "error_PERMISSION_MISSING": {
+    "message": "この事業者への接続が許可されていません。設定画面でキーをもう一度保存してください。"
+  },
+  "error_BUILTIN_UNAVAILABLE": {
+    "message": "このブラウザでは端末内翻訳を利用できません（デスクトップ版 Chrome 138 以降が必要です）。代わりに自分の API キーを登録できます。"
+  },
+  "error_MODEL_DOWNLOAD_REQUIRED": {
+    "message": "端末内翻訳のモデルを先にダウンロードする必要があります。ボタンを押すとダウンロードして翻訳を続けます。"
+  },
+  "error_MODEL_UNAVAILABLE": {
+    "message": "この端末では端末内翻訳のモデルを準備できませんでした（空き容量不足など）。"
+  },
+  "error_DETECTION_FAILED": {
+    "message": "原文の言語を判定できませんでした。設定画面で翻訳元の言語を指定してください。"
+  },
+  "error_NO_SELECTION": {
+    "message": "先にページ上のテキストを選択してください。"
+  },
+  "error_UNKNOWN": {
+    "message": "予期しないエラーで翻訳できませんでした。"
+  },
+  "reason_AUTH": {
+    "message": "認証エラー"
+  },
+  "reason_QUOTA": {
+    "message": "上限超過"
+  },
+  "reason_NETWORK": {
+    "message": "ネットワークエラー"
+  },
+  "reason_TOO_LONG": {
+    "message": "テキストが長すぎる"
+  },
+  "reason_UNSUPPORTED_LANG": {
+    "message": "非対応の言語"
+  },
+  "reason_NO_KEY": {
+    "message": "キー未登録"
+  },
+  "reason_PERMISSION_MISSING": {
+    "message": "接続が未許可"
+  },
+  "reason_BUILTIN_UNAVAILABLE": {
+    "message": "端末内翻訳が利用不可"
+  },
+  "reason_MODEL_DOWNLOAD_REQUIRED": {
+    "message": "モデルのダウンロードが必要"
+  },
+  "reason_MODEL_UNAVAILABLE": {
+    "message": "モデルを利用できない"
+  },
+  "reason_DETECTION_FAILED": {
+    "message": "言語判定に失敗"
+  },
+  "reason_NO_SELECTION": {
+    "message": "選択なし"
+  },
+  "reason_UNKNOWN": {
+    "message": "予期しないエラー"
+  },
+  "hudClose": {
+    "message": "閉じる（Esc）"
+  },
+  "hudLoadingLabel": {
+    "message": "QuickLens：翻訳中"
+  },
+  "hudTranslating": {
+    "message": "翻訳中：「$ARG1$」（$ARG2$）…",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      },
+      "arg2": {
+        "content": "$2"
+      }
+    }
+  },
+  "hudDownloadingModel": {
+    "message": "端末内翻訳のモデルをダウンロード中… $ARG1$%",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      }
+    }
+  },
+  "hudTranslatingChunks": {
+    "message": "長文を翻訳中… $ARG1$ / $ARG2$",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      },
+      "arg2": {
+        "content": "$2"
+      }
+    }
+  },
+  "hudResultLabel": {
+    "message": "QuickLens 翻訳結果"
+  },
+  "hudFallbackNotice": {
+    "message": "$ARG1$ が失敗したため、端末内翻訳で表示しています（理由：$ARG2$）。",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      },
+      "arg2": {
+        "content": "$2"
+      }
+    }
+  },
+  "hudAiFailedAlso": {
+    "message": "$ARG1$ が失敗し（理由：$ARG2$）、端末内翻訳も利用できませんでした。",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      },
+      "arg2": {
+        "content": "$2"
+      }
+    }
+  },
+  "hudToneNotSupported": {
+    "message": "$ARG1$ はこのトーンに対応していないため、通常の翻訳で表示しています。",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      }
+    }
+  },
+  "hudCopy": {
+    "message": "翻訳文をコピー"
+  },
+  "hudCopyShort": {
+    "message": "コピー"
+  },
+  "hudCopied": {
+    "message": "コピーしました"
+  },
+  "hudCopyFailed": {
+    "message": "コピーできませんでした"
+  },
+  "hudSpeak": {
+    "message": "読み上げ"
+  },
+  "hudOpenSettings": {
+    "message": "設定を開く"
+  },
+  "hudRegisterKey": {
+    "message": "自分の API キーを登録する"
+  },
+  "hudDownloadAndContinue": {
+    "message": "モデルをダウンロードして翻訳"
+  },
+  "hudOriginal": {
+    "message": "原文"
+  },
+  "hudTarget": {
+    "message": "翻訳先：$ARG1$",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      }
+    }
+  },
+  "hudEscToClose": {
+    "message": "Esc で閉じる"
+  },
+  "hudErrorLabel": {
+    "message": "QuickLens エラー"
+  },
+  "hudErrorTitle": {
+    "message": "翻訳できませんでした"
+  },
+  "hudSetupTitle": {
+    "message": "初回の準備"
+  },
+  "labelEngine": {
+    "message": "翻訳エンジン"
+  },
+  "openSettings": {
+    "message": "設定を開く"
+  },
+  "registerKey": {
+    "message": "キーを登録"
+  },
+  "engineNoKeyHint": {
+    "message": "$ARG1$ のキーが未登録です。",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      }
+    }
+  },
+  "labelTargetLang": {
+    "message": "翻訳先の言語"
+  },
+  "labelSourceLang": {
+    "message": "翻訳元の言語"
+  },
+  "sourceAuto": {
+    "message": "自動判定"
+  },
+  "moreLanguages": {
+    "message": "その他…"
+  },
+  "labelTone": {
+    "message": "トーン"
+  },
+  "toneHintFree": {
+    "message": "トーンは AI エンジン（自分のキー）で利用できます。"
+  },
+  "labelSourceText": {
+    "message": "テキスト"
+  },
+  "clear": {
+    "message": "クリア"
+  },
+  "sourcePlaceholder": {
+    "message": "ページでテキストを選択するか、ここに入力…"
+  },
+  "translateButton": {
+    "message": "翻訳する（Ctrl+Enter）"
+  },
+  "translatingButton": {
+    "message": "翻訳中…"
+  },
+  "resultTitle": {
+    "message": "翻訳結果"
+  },
+  "resultPlaceholder": {
+    "message": "ページで選択したテキストを自動で読み込みます。"
+  },
+  "resultEmpty": {
+    "message": "テキストを入力または選択してください。"
+  },
+  "donatePromptLine": {
+    "message": "役に立っていたら応援してもらえると嬉しいです"
+  },
+  "donateDismiss": {
+    "message": "しばらく表示しない"
+  },
+  "optionsTitle": {
+    "message": "QuickLens 設定"
+  },
+  "optionsLead": {
+    "message": "変更は自動で保存されます。"
+  },
+  "sectionTranslation": {
+    "message": "翻訳"
+  },
+  "engineDesc": {
+    "message": "端末内翻訳はキーなしで使えます。自分のキーを登録した AI エンジンを選ぶと、テキストはその事業者に送信されます。"
+  },
+  "toneDesc": {
+    "message": "トーンは Gemini と OpenAI で有効です。DeepL は「自然な訳」と「ビジネス敬語」に対応します。端末内翻訳は常に「自然な訳」です。"
+  },
+  "sectionKeys": {
+    "message": "自分の API キー（任意）"
+  },
+  "keysDesc": {
+    "message": "キーを保存すると、その事業者への接続許可を Chrome が確認します。キーを削除すると許可も解除されます。"
+  },
+  "keyLabel_gemini": {
+    "message": "Google Gemini の API キー"
+  },
+  "keyLabel_openai": {
+    "message": "OpenAI の API キー"
+  },
+  "keyLabel_deepl": {
+    "message": "DeepL の API キー（Free 版は末尾が :fx）"
+  },
+  "keySave": {
+    "message": "保存"
+  },
+  "keyRemove": {
+    "message": "削除"
+  },
+  "keySaved": {
+    "message": "この端末に保存済み"
+  },
+  "keyNotSaved": {
+    "message": "未登録"
+  },
+  "keyRemoved": {
+    "message": "削除しました。この事業者への接続許可も解除しました。"
+  },
+  "keyEmpty": {
+    "message": "キーを入力してください。"
+  },
+  "keyPermissionDenied": {
+    "message": "接続が許可されなかったため、キーは保存していません。"
+  },
+  "keyGetLink": {
+    "message": "キーを取得"
+  },
+  "keyProviderPrivacy": {
+    "message": "事業者のプライバシーポリシー"
+  },
+  "sectionDisplay": {
+    "message": "表示"
+  },
+  "labelHudPosition": {
+    "message": "翻訳カードの表示位置"
+  },
+  "hudPosition_selection": {
+    "message": "選択範囲の近く"
+  },
+  "hudPosition_corner": {
+    "message": "右下に固定"
+  },
+  "labelTheme": {
+    "message": "テーマ"
+  },
+  "theme_system": {
+    "message": "システムに合わせる"
+  },
+  "theme_light": {
+    "message": "ライト"
+  },
+  "theme_dark": {
+    "message": "ダーク"
+  },
+  "labelToastDuration": {
+    "message": "翻訳カードを自動で閉じるまでの時間"
+  },
+  "duration_5": {
+    "message": "5 秒"
+  },
+  "duration_10": {
+    "message": "10 秒"
+  },
+  "duration_20": {
+    "message": "20 秒"
+  },
+  "duration_manual": {
+    "message": "手動で閉じるまで表示"
+  },
+  "labelAutoTranslatePopup": {
+    "message": "ポップアップを開いたとき、選択中のテキストを自動で翻訳する"
+  },
+  "sectionShortcut": {
+    "message": "キーボードショートカット"
+  },
+  "shortcutCurrent": {
+    "message": "選択テキストを翻訳："
+  },
+  "shortcutNotSet": {
+    "message": "未設定"
+  },
+  "shortcutHowToChange": {
+    "message": "変更するには Chrome の拡張機能ショートカット設定を開いてください。"
+  },
+  "shortcutOpenSettings": {
+    "message": "ショートカット設定を開く"
+  },
+  "sectionPrivacy": {
+    "message": "プライバシー"
+  },
+  "privacyOnDevice": {
+    "message": "端末内翻訳は、この端末の Chrome の中で処理されます。翻訳のためにテキストを外部へ送信しません。"
+  },
+  "privacyByok": {
+    "message": "Gemini・OpenAI・DeepL を選んだ場合に限り、選択したテキストがあなたのキーでブラウザからその事業者へ直接送信され、各事業者のポリシーに従って扱われます。"
+  },
+  "privacyKeys": {
+    "message": "キーはこの端末にのみ保存され、開発者のサーバーには送信されません（開発者はサーバーを運営していません）。"
+  },
+  "privacyNoServer": {
+    "message": "設定は Chrome アカウントの同期で保存されます。応援メッセージの表示に使う翻訳回数はこの端末内にのみ保存します。利用状況の収集は行いません。"
+  },
+  "sectionDonate": {
+    "message": "開発を応援する"
+  },
+  "donateDesc": {
+    "message": "QuickLens はすべての機能を誰でも無料で使えます。役に立っていたら、開発を応援していただけると励みになります。"
+  },
+  "donateButton": {
+    "message": "応援する"
+  },
+  "resetSettings": {
+    "message": "初期設定に戻す"
+  },
+  "resetConfirm": {
+    "message": "設定を初期値に戻しますか？（API キーは残ります）"
+  },
+  "savedToast": {
+    "message": "保存しました"
+  },
+  "onboardingTitle": {
+    "message": "QuickLens へようこそ"
+  },
+  "onboardingLead": {
+    "message": "Web ページで選択したテキストをすぐに翻訳できます。"
+  },
+  "onboardingHowTitle": {
+    "message": "3 つの使い方"
+  },
+  "howContextMenuTitle": {
+    "message": "右クリック"
+  },
+  "howContextMenuBody": {
+    "message": "テキストを選択して右クリックし、「QuickLens で翻訳」を選びます。"
+  },
+  "howShortcutTitle": {
+    "message": "ショートカット"
+  },
+  "howShortcutBody": {
+    "message": "テキストを選択して次のキーを押します："
+  },
+  "howPopupTitle": {
+    "message": "ポップアップ"
+  },
+  "howPopupBody": {
+    "message": "ツールバーの QuickLens アイコンを押します。選択中のテキストが入力され、手入力もできます。"
+  },
+  "onboardingEnginesTitle": {
+    "message": "2 種類のエンジン"
+  },
+  "engineFreeExplain": {
+    "message": "標準のエンジンです。この端末の Chrome に組み込まれた翻訳モデルを使います。無料・キー不要で、テキストは端末の外に出ません。モデルは言語の組み合わせごとに初回だけダウンロードされます。"
+  },
+  "engineAiExplain": {
+    "message": "任意です。設定画面で自分の Gemini・OpenAI・DeepL のキーを登録すると、ビジネス敬語や要約などのトーンが使えます。その場合、テキストはその事業者に送信されます。"
+  },
+  "prepareModelButton": {
+    "message": "端末内翻訳のモデルを今すぐ準備する"
+  },
+  "preparing": {
+    "message": "準備中…"
+  },
+  "prepareDone": {
+    "message": "準備できました。端末内翻訳を利用できます。"
+  },
+  "onboardingDonateLink": {
+    "message": "開発を応援する"
+  }
+}

@@ -1,304 +1,352 @@
 /**
- * QuickLens - Popup Controller
+ * QuickLens - Popup controller
+ * On-device translation runs right here (the popup is a top-level extension page where the
+ * Translator API is available); AI translation goes through the background service worker.
  */
 
 document.addEventListener("DOMContentLoaded", async () => {
-  const { DEFAULT_SETTINGS, ACTIONS, TIMING, ENGINE_BADGE_LABELS } = self.QUICKLENS_CONFIG;
-  const RESTRICTED_URL_PREFIXES = ["chrome://", "edge://"];
+  const { DEFAULT_SETTINGS, ACTIONS, TIMING, QUICK_LANGUAGES, TONES, ENGINE_TONES, AI_ENGINES, DONATION_URL } =
+    globalThis.QUICKLENS_CONFIG;
+  const { CODES, messageKey, reasonKey } = globalThis.QuickLensErrors;
+  const Lang = globalThis.QuickLensLanguages;
+  const I18n = globalThis.QuickLensI18n;
+  const Icons = globalThis.QuickLensIcons;
+  const Theme = globalThis.QuickLensTheme;
+  const Client = globalThis.QuickLensClient;
+  const Usage = globalThis.QuickLensUsage;
+  const t = I18n.t;
 
-  // UI References
-  const engineToggleBtn = document.getElementById("engine-toggle-btn");
-  const engineBadgeText = document.getElementById("engine-badge-text");
-  const vaultDrawer = document.getElementById("vault-drawer");
-  const geminiKeyInput = document.getElementById("gemini-key-input");
-  const saveGeminiBtn = document.getElementById("save-gemini-btn");
-  const openaiKeyInput = document.getElementById("openai-key-input");
-  const saveOpenaiBtn = document.getElementById("save-openai-btn");
-  const chipFree = document.getElementById("chip-free");
-  const chipGemini = document.getElementById("chip-gemini");
-  const chipOpenai = document.getElementById("chip-openai");
+  const $ = (id) => document.getElementById(id);
+  const engineSelect = $("engine-select");
+  const engineHint = $("engine-hint");
+  const langRow = $("lang-row");
+  const toneRow = $("tone-row");
+  const toneHint = $("tone-hint");
+  const sourceInput = $("source-input");
+  const charCount = $("char-count");
+  const translateBtn = $("translate-btn");
+  const translateSpinner = $("translate-spinner");
+  const translateLabel = $("translate-label");
+  const resultBody = $("result-body");
+  const resultEngine = $("result-engine");
+  const progress = $("progress");
+  const notice = $("notice");
+  const noticeText = $("notice-text");
+  const resultActions = $("result-actions");
+  const copyBtn = $("copy-btn");
+  const copyLabel = $("copy-label");
 
-  const langPills = document.querySelectorAll(".lang-pill");
-  const moreLangSelect = document.getElementById("more-lang-select");
-  const toneTabs = document.querySelectorAll(".tone-tab");
+  const settings = await chrome.storage.sync.get(DEFAULT_SETTINGS);
+  Theme.applyToDocument(settings.theme);
+  I18n.apply();
 
-  const sourceInput = document.getElementById("source-input");
-  const sourceCharCount = document.getElementById("source-char-count");
-  const clearSourceBtn = document.getElementById("clear-source-btn");
-  const detectedBadge = document.getElementById("detected-badge");
+  let keyStatus = { gemini: false, openai: false, deepl: false };
+  let output = "";
+  let running = false;
 
-  const triggerBtn = document.getElementById("trigger-btn");
-  const triggerSpinner = document.getElementById("trigger-spinner");
-  const triggerText = document.getElementById("trigger-text");
+  // ---------- Build controls ----------
 
-  const canvasResult = document.getElementById("canvas-result");
-  const canvasCopyBtn = document.getElementById("canvas-copy-btn");
-  const canvasSpeakBtn = document.getElementById("canvas-speak-btn");
-
-  let currentTargetLang = DEFAULT_SETTINGS.targetLang;
-  let currentTone = DEFAULT_SETTINGS.tone;
-  let currentEngine = DEFAULT_SETTINGS.engine;
-  let currentTranslatedOutput = "";
-
-  // 1. 設定の読み込み
-  const settings = await chrome.storage.sync.get({
-    engine: DEFAULT_SETTINGS.engine,
-    tone: DEFAULT_SETTINGS.tone,
-    targetLang: DEFAULT_SETTINGS.targetLang,
-    autoTranslatePopup: DEFAULT_SETTINGS.autoTranslatePopup
-  });
-
-  currentTargetLang = settings.targetLang || DEFAULT_SETTINGS.targetLang;
-  currentTone = settings.tone || DEFAULT_SETTINGS.tone;
-  currentEngine = settings.engine || DEFAULT_SETTINGS.engine;
-
-  updateLanguagePillsUI(currentTargetLang);
-  updateToneTabsUI(currentTone);
-  updateEngineUI(currentEngine);
-  await refreshVaultStatus();
-
-  // 2. アクティブタブからテキスト自動検出 (Gmail/GitHub/SPA完全対応)
-  try {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    if (tab && tab.id && !RESTRICTED_URL_PREFIXES.some((prefix) => tab.url.startsWith(prefix))) {
-      chrome.tabs.sendMessage(tab.id, { action: ACTIONS.GET_SELECTED_TEXT }, (response) => {
-        if (chrome.runtime.lastError) {
-          // コンテンツスクリプト未ロード時の安全なフォールバック
-          chrome.scripting.executeScript(
-            {
-              target: { tabId: tab.id },
-              func: () => {
-                const s = window.getSelection();
-                if (s && s.toString().trim()) return s.toString().trim();
-                const a = document.activeElement;
-                if (a && (a.tagName === "TEXTAREA" || a.tagName === "INPUT")) {
-                  return a.value.substring(a.selectionStart, a.selectionEnd).trim();
-                }
-                return "";
-              }
-            },
-            (results) => {
-              if (results && results[0] && results[0].result) {
-                applyDetectedText(results[0].result);
-              }
-            }
-          );
-        } else if (response && response.selectionText) {
-          applyDetectedText(response.selectionText);
-        }
-      });
-    }
-  } catch (err) {
-    console.log("[QuickLens] 自動検出スキップ:", err);
+  function buildLanguageControls() {
+    langRow.innerHTML = "";
+    QUICK_LANGUAGES.forEach((code) => {
+      const b = document.createElement("button");
+      b.className = "pill";
+      b.type = "button";
+      b.dataset.lang = code;
+      b.textContent = Lang.nativeName(code);
+      b.setAttribute("aria-pressed", String(settings.targetLang === code));
+      b.addEventListener("click", () => setTargetLang(code));
+      langRow.appendChild(b);
+    });
+    const more = document.createElement("select");
+    more.className = "select more-select";
+    more.setAttribute("aria-label", t("moreLanguages"));
+    const first = document.createElement("option");
+    first.value = "";
+    first.textContent = t("moreLanguages");
+    more.appendChild(first);
+    Lang.codes().filter((c) => !QUICK_LANGUAGES.includes(c)).forEach((c) => {
+      const o = document.createElement("option");
+      o.value = c;
+      o.textContent = Lang.nativeName(c);
+      more.appendChild(o);
+    });
+    if (!QUICK_LANGUAGES.includes(settings.targetLang)) more.value = settings.targetLang;
+    more.addEventListener("change", () => more.value && setTargetLang(more.value));
+    langRow.appendChild(more);
   }
 
-  function applyDetectedText(text) {
-    if (!text || !text.trim()) return;
-    sourceInput.value = text.trim();
-    updateCharCount();
-    detectedBadge.textContent = "⚡ ページから自動検出";
-    detectedBadge.style.color = "#38bdf8";
-
-    if (settings.autoTranslatePopup) {
-      executeInsight();
-    }
-  }
-
-  function updateCharCount() {
-    sourceCharCount.textContent = `${sourceInput.value.length}文字`;
-  }
-
-  sourceInput.addEventListener("input", updateCharCount);
-
-  clearSourceBtn.addEventListener("click", () => {
-    sourceInput.value = "";
-    updateCharCount();
-    canvasResult.textContent = "選択テキストを自動取得してここに表示します";
-    canvasResult.classList.add("placeholder-hint");
-    detectedBadge.textContent = "手動入力モード";
-    detectedBadge.style.color = "#94a3b8";
-    currentTranslatedOutput = "";
-    sourceInput.focus();
-  });
-
-  // 言語ピルの切り替え
-  function updateLanguagePillsUI(lang) {
-    langPills.forEach((pill) => {
-      if (pill.dataset.lang === lang) {
-        pill.classList.add("active");
-      } else {
-        pill.classList.remove("active");
-      }
+  function buildToneControls() {
+    toneRow.innerHTML = "";
+    TONES.forEach((tone) => {
+      const b = document.createElement("button");
+      b.className = "pill";
+      b.type = "button";
+      b.dataset.tone = tone;
+      b.textContent = t(`tone_${tone}`);
+      b.addEventListener("click", () => setTone(tone));
+      toneRow.appendChild(b);
     });
   }
 
-  langPills.forEach((pill) => {
-    pill.addEventListener("click", () => {
-      currentTargetLang = pill.dataset.lang;
-      updateLanguagePillsUI(currentTargetLang);
-      chrome.storage.sync.set({ targetLang: currentTargetLang });
-      if (sourceInput.value.trim()) executeInsight();
-    });
-  });
-
-  moreLangSelect.addEventListener("change", () => {
-    if (moreLangSelect.value) {
-      currentTargetLang = moreLangSelect.value;
-      updateLanguagePillsUI("");
-      chrome.storage.sync.set({ targetLang: currentTargetLang });
-      if (sourceInput.value.trim()) executeInsight();
-    }
-  });
-
-  // 文体・トーン切り替え
-  function updateToneTabsUI(tone) {
-    toneTabs.forEach((tab) => {
-      if (tab.dataset.tone === tone) {
-        tab.classList.add("active");
-      } else {
-        tab.classList.remove("active");
-      }
-    });
+  function refreshLanguageUI() {
+    langRow.querySelectorAll(".pill").forEach((p) => p.setAttribute("aria-pressed", String(p.dataset.lang === settings.targetLang)));
+    const more = langRow.querySelector("select");
+    more.value = QUICK_LANGUAGES.includes(settings.targetLang) ? "" : settings.targetLang;
   }
 
-  toneTabs.forEach((tab) => {
-    tab.addEventListener("click", () => {
-      currentTone = tab.dataset.tone;
-      updateToneTabsUI(currentTone);
-      chrome.storage.sync.set({ tone: currentTone });
-      if (sourceInput.value.trim()) executeInsight();
+  function refreshToneUI() {
+    const allowed = ENGINE_TONES[settings.engine] || ENGINE_TONES.free;
+    toneRow.querySelectorAll(".pill").forEach((p) => {
+      const ok = allowed.includes(p.dataset.tone);
+      p.disabled = !ok;
+      p.setAttribute("aria-pressed", String(ok && p.dataset.tone === settings.tone));
     });
-  });
-
-  // エンジンバッジ & 金庫ドロワー
-  engineToggleBtn.addEventListener("click", () => {
-    vaultDrawer.classList.toggle("open");
-  });
-
-  function updateEngineUI(engine) {
-    currentEngine = engine;
-    chrome.storage.sync.set({ engine: engine });
-
-    chipFree.classList.remove("active", "ai");
-    chipGemini.classList.remove("active", "ai");
-    chipOpenai.classList.remove("active", "ai");
-
-    if (engine === "gemini") {
-      chipGemini.classList.add("active", "ai");
-      engineBadgeText.textContent = ENGINE_BADGE_LABELS.gemini;
-      engineToggleBtn.classList.add("ai");
-    } else if (engine === "openai") {
-      chipOpenai.classList.add("active", "ai");
-      engineBadgeText.textContent = ENGINE_BADGE_LABELS.openai;
-      engineToggleBtn.classList.add("ai");
+    if (settings.engine === "free") {
+      toneHint.textContent = t("toneHintFree");
+      toneHint.hidden = false;
+    } else if (!allowed.includes(settings.tone)) {
+      toneHint.textContent = t("hudToneNotSupported", [t(`engine_${settings.engine}`)]);
+      toneHint.hidden = false;
     } else {
-      chipFree.classList.add("active");
-      engineBadgeText.textContent = ENGINE_BADGE_LABELS.free;
-      engineToggleBtn.classList.remove("ai");
+      toneHint.hidden = true;
     }
   }
 
-  chipFree.addEventListener("click", () => updateEngineUI("free"));
-  chipGemini.addEventListener("click", () => updateEngineUI("gemini"));
-  chipOpenai.addEventListener("click", () => updateEngineUI("openai"));
-
-  // キー暗号化保存
-  async function refreshVaultStatus() {
-    const status = await self.VaultCrypto.getApiKeyStatus();
-    if (status.hasGeminiKey) {
-      geminiKeyInput.placeholder = "•••••••••••• (保存済み)";
-    }
-    if (status.hasOpenaiKey) {
-      openaiKeyInput.placeholder = "•••••••••••• (保存済み)";
-    }
+  function refreshEngineUI() {
+    engineSelect.value = settings.engine;
+    const needsKey = AI_ENGINES.includes(settings.engine) && !keyStatus[settings.engine];
+    engineHint.hidden = !needsKey;
+    if (needsKey) $("engine-hint-text").textContent = t("engineNoKeyHint", [t(`engine_${settings.engine}`)]);
+    refreshToneUI();
   }
 
-  function bindKeySaveButton(provider, saveBtn, keyInput) {
-    saveBtn.addEventListener("click", async () => {
-      const key = keyInput.value.trim();
-      await self.VaultCrypto.saveEncryptedApiKey(provider, key);
-      saveBtn.textContent = "✓ 保存";
-      keyInput.value = "";
-      await refreshVaultStatus();
-      updateEngineUI(provider);
-      setTimeout(() => { saveBtn.textContent = "保存"; }, TIMING.BUTTON_FEEDBACK);
+  async function save(patch) {
+    Object.assign(settings, patch);
+    await chrome.storage.sync.set(patch);
+  }
+
+  async function setTargetLang(code) {
+    await save({ targetLang: code });
+    refreshLanguageUI();
+    if (sourceInput.value.trim()) translate();
+  }
+
+  async function setTone(tone) {
+    await save({ tone });
+    refreshToneUI();
+    if (sourceInput.value.trim()) translate();
+  }
+
+  engineSelect.addEventListener("change", async () => {
+    await save({ engine: engineSelect.value });
+    refreshEngineUI();
+  });
+
+  const openOptions = () => chrome.runtime.openOptionsPage();
+  $("open-options").addEventListener("click", openOptions);
+  $("engine-hint-link").addEventListener("click", openOptions);
+
+  // ---------- Result rendering ----------
+
+  function setBusy(busy) {
+    running = busy;
+    translateBtn.disabled = busy;
+    translateSpinner.hidden = !busy;
+    translateLabel.textContent = busy ? t("translatingButton") : t("translateButton");
+  }
+
+  function showNotice(text) {
+    noticeText.textContent = text || "";
+    notice.hidden = !text;
+  }
+
+  function showResultActions(actions) {
+    resultActions.innerHTML = "";
+    resultActions.hidden = !actions.length;
+    actions.forEach((a) => {
+      const b = document.createElement("button");
+      b.className = `btn ${a.primary ? "primary" : ""}`;
+      b.type = "button";
+      b.innerHTML = Icons.svg(a.icon, 13);
+      b.append(a.label);
+      b.addEventListener("click", a.onClick);
+      resultActions.appendChild(b);
     });
   }
 
-  bindKeySaveButton("gemini", saveGeminiBtn, geminiKeyInput);
-  bindKeySaveButton("openai", saveOpenaiBtn, openaiKeyInput);
+  function renderPlaceholder(key) {
+    resultBody.textContent = t(key);
+    resultBody.classList.add("placeholder");
+    resultEngine.textContent = "";
+    output = "";
+  }
 
-  // 翻訳・読み解きメイン処理
-  async function executeInsight() {
+  function renderError(err) {
+    const code = (err && err.code) || CODES.UNKNOWN;
+    let text = t(messageKey(code));
+    if (err && err.aiFailure) {
+      text = `${t("hudAiFailedAlso", [t(`engine_${err.aiFailure.from}`), t(reasonKey(err.aiFailure.reason))])}\n${text}`;
+    }
+    resultBody.textContent = text;
+    resultBody.classList.add("placeholder");
+    output = "";
+    const actions = [];
+    if (code === CODES.MODEL_DOWNLOAD_REQUIRED) {
+      actions.push({ icon: "download", label: t("hudDownloadAndContinue"), primary: true, onClick: () => translate() });
+    }
+    if (code !== CODES.MODEL_DOWNLOAD_REQUIRED && code !== CODES.NETWORK && code !== CODES.NO_SELECTION) {
+      actions.push({ icon: "key", label: AI_ENGINES.includes(settings.engine) ? t("hudOpenSettings") : t("hudRegisterKey"), onClick: openOptions });
+    }
+    showResultActions(actions);
+  }
+
+  async function translate() {
     const text = sourceInput.value.trim();
     if (!text) {
-      canvasResult.textContent = "テキストを入力または選択してください";
-      canvasResult.classList.add("placeholder-hint");
+      renderPlaceholder("resultEmpty");
       return;
     }
-
-    triggerBtn.disabled = true;
-    triggerSpinner.style.display = "inline-block";
-    triggerText.textContent = "読み解き中...";
-    canvasResult.textContent = "解析中...";
-    canvasResult.classList.remove("placeholder-hint");
+    if (running) return;
+    setBusy(true);
+    showNotice("");
+    showResultActions([]);
+    progress.hidden = true;
+    resultBody.textContent = t("translatingButton");
+    resultBody.classList.add("placeholder");
 
     try {
-      const response = await new Promise((resolve, reject) => {
-        chrome.runtime.sendMessage(
-          {
-            action: ACTIONS.EXECUTE_TRANSLATION,
-            text: text,
-            targetLang: currentTargetLang,
-            tone: currentTone
-          },
-          (res) => {
-            if (chrome.runtime.lastError) return reject(new Error(chrome.runtime.lastError.message));
-            resolve(res);
-          }
-        );
+      const result = await Client.translate({
+        text,
+        engine: settings.engine,
+        tone: settings.tone,
+        sourceLang: settings.sourceLang,
+        targetLang: settings.targetLang,
+        onDownloadProgress: (f) => {
+          const pct = Math.round(Math.max(0, Math.min(1, f)) * 100);
+          progress.hidden = false;
+          progress.firstElementChild.style.width = `${pct}%`;
+          resultBody.textContent = t("hudDownloadingModel", [String(pct)]);
+        },
+        onChunkProgress: (d, n) => {
+          if (n > 1) resultBody.textContent = t("hudTranslatingChunks", [String(d), String(n)]);
+        }
       });
-
-      if (response && response.success) {
-        currentTranslatedOutput = response.translatedText;
-        canvasResult.textContent = response.translatedText;
-        canvasResult.classList.remove("placeholder-hint");
-      } else {
-        throw new Error(response ? response.error : "解析に失敗しました");
+      output = result.translatedText;
+      resultBody.textContent = output;
+      resultBody.classList.remove("placeholder");
+      resultEngine.textContent = `· ${t(`engine_${result.engineUsed}`)}`;
+      if (result.fallback) {
+        showNotice(t("hudFallbackNotice", [t(`engine_${result.fallback.from}`), t(reasonKey(result.fallback.reason))]));
+        showResultActions([{ icon: "key", label: t("hudOpenSettings"), onClick: openOptions }]);
+      } else if (result.toneAdjusted && AI_ENGINES.includes(result.engineUsed)) {
+        showNotice(t("hudToneNotSupported", [t(`engine_${result.engineUsed}`)]));
       }
+      refreshDonation();
     } catch (err) {
-      console.error("[QuickLens] 実行失敗:", err);
-      canvasResult.textContent = `⚠️ 取得エラー: ${err.message || "通信状況を確認してください"}`;
+      renderError(err);
     } finally {
-      triggerBtn.disabled = false;
-      triggerSpinner.style.display = "none";
-      triggerText.textContent = "読み解く (Ctrl+Enter)";
+      progress.hidden = true;
+      setBusy(false);
     }
   }
 
-  triggerBtn.addEventListener("click", executeInsight);
-
+  translateBtn.addEventListener("click", translate);
   sourceInput.addEventListener("keydown", (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
       e.preventDefault();
-      executeInsight();
+      translate();
     }
   });
-
-  // コピー
-  canvasCopyBtn.addEventListener("click", async () => {
-    if (!currentTranslatedOutput) return;
-    await navigator.clipboard.writeText(currentTranslatedOutput);
-    canvasCopyBtn.textContent = "✓ 完了";
-    setTimeout(() => { canvasCopyBtn.textContent = "📋 コピー"; }, TIMING.BUTTON_FEEDBACK);
+  sourceInput.addEventListener("input", () => { charCount.textContent = String(sourceInput.value.length); });
+  $("clear-source").addEventListener("click", () => {
+    sourceInput.value = "";
+    charCount.textContent = "0";
+    renderPlaceholder("resultPlaceholder");
+    showNotice("");
+    showResultActions([]);
+    sourceInput.focus();
   });
 
-  // 音声再生
-  canvasSpeakBtn.addEventListener("click", () => {
-    if (!currentTranslatedOutput || !("speechSynthesis" in window)) return;
+  copyBtn.addEventListener("click", async () => {
+    if (!output) return;
+    try {
+      await navigator.clipboard.writeText(output);
+      copyLabel.textContent = t("hudCopied");
+    } catch (_e) {
+      copyLabel.textContent = t("hudCopyFailed");
+    }
+    setTimeout(() => { copyLabel.textContent = t("hudCopyShort"); }, TIMING.BUTTON_FEEDBACK);
+  });
+
+  $("speak-btn").addEventListener("click", () => {
+    if (!output || !("speechSynthesis" in window)) return;
     window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(currentTranslatedOutput);
-    utterance.lang = currentTargetLang;
-    window.speechSynthesis.speak(utterance);
+    const u = new SpeechSynthesisUtterance(output);
+    u.lang = settings.targetLang;
+    window.speechSynthesis.speak(u);
   });
+
+  // ---------- Donation footer (only after N translations; dismiss = snooze) ----------
+
+  async function refreshDonation() {
+    const footer = $("donate-footer");
+    try {
+      const state = await Usage.getDonationState();
+      footer.hidden = !state.show;
+      if (state.show) $("donate-link").href = DONATION_URL;
+    } catch (_e) {
+      footer.hidden = true;
+    }
+  }
+
+  $("donate-dismiss").addEventListener("click", async () => {
+    await Usage.dismissDonationPrompt();
+    $("donate-footer").hidden = true;
+  });
+
+  // ---------- Init ----------
+
+  buildLanguageControls();
+  buildToneControls();
+  Icons.hydrate();
+  try {
+    const res = await chrome.runtime.sendMessage({ action: ACTIONS.VAULT_GET_STATUS });
+    if (res && res.ok) keyStatus = res.status;
+  } catch (_e) {
+    // keep defaults
+  }
+  refreshEngineUI();
+  refreshLanguageUI();
+  renderPlaceholder("resultPlaceholder");
+  refreshDonation();
+
+  // Pick up the selection from the active tab (opening the popup grants activeTab).
+  try {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (tab && tab.id !== undefined) {
+      const results = await chrome.scripting.executeScript({
+        target: { tabId: tab.id, allFrames: true },
+        func: () => {
+          const s = window.getSelection();
+          if (s && s.toString().trim()) return { text: s.toString().trim(), focused: document.hasFocus() };
+          const a = document.activeElement;
+          if (a && (a.tagName === "TEXTAREA" || a.tagName === "INPUT") && typeof a.selectionStart === "number") {
+            return { text: a.value.substring(a.selectionStart, a.selectionEnd).trim(), focused: document.hasFocus() };
+          }
+          return { text: "", focused: false };
+        }
+      });
+      const found = results.map((r) => r && r.result).filter((r) => r && r.text);
+      const pick = found.find((r) => r.focused) || found[0];
+      if (pick) {
+        sourceInput.value = pick.text;
+        charCount.textContent = String(pick.text.length);
+        if (settings.autoTranslatePopup) translate();
+      }
+    }
+  } catch (_e) {
+    // Restricted page (chrome://, Web Store, etc.) — manual input still works.
+  }
+  sourceInput.focus();
 });

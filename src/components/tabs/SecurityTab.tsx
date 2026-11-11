@@ -5,10 +5,10 @@ const SECURITY_POINTS = [
     icon: Lock,
     titleClassName: "text-purple-400",
     codeClassName: "text-purple-300",
-    title: "1. 端末内暗号化 (Web Crypto AES-GCM 256bit)",
+    title: "1. API キーは端末内にのみ保存",
     body: (
       <>
-        APIキーはクラウド（<code>chrome.storage.sync</code>）には一切保存されません。拡張機能のローカル隔離領域（<code>chrome.storage.local</code>）に、端末固有ソルトとPBKDF2で導出したAES-GCMキーで暗号化して保管されます。
+        API キーは同期される <code>chrome.storage.sync</code> ではなく、この端末の <code>chrome.storage.local</code> に保存されます。保存時に AES-GCM で暗号化しますが、鍵は同じ端末内の情報から作るため、難読化に近い仕組みです。キーは開発者のサーバーには送信されません（開発者はサーバーを運営していません）。
       </>
     ),
     code: <>暗号化ペイロード: &#123; iv, ciphertext, updatedAt &#125;</>
@@ -17,10 +17,10 @@ const SECURITY_POINTS = [
     icon: Globe,
     titleClassName: "text-cyan-400",
     codeClassName: "text-cyan-300",
-    title: "2. ゼロ・トラスト直接通信 (サーバー仲介なし)",
+    title: "2. 送信先はエンジンごとに明確",
     body: (
       <>
-        中継サーバーやプロキシを挟まず、ブラウザのバックグラウンド（Service Worker）からGoogle GeminiまたはOpenAIの公式エンドポイントへ直接HTTPS接続。第三者にキーや翻訳テキストが漏洩する懸念はありません。
+        標準の端末内翻訳ではテキストを外部へ送信しません。自分のキーを登録して Gemini / OpenAI / DeepL を選んだ場合に限り、テキストがブラウザからその事業者の公式 API へ直接送信されます。
       </>
     ),
     code: <>Browser &rarr; https://generativelanguage.googleapis.com</>
@@ -29,10 +29,10 @@ const SECURITY_POINTS = [
     icon: Layers,
     titleClassName: "text-emerald-400",
     codeClassName: "text-emerald-300",
-    title: "3. Closed Shadow DOM によるCSS完全隔離",
+    title: "3. Closed Shadow DOM による CSS の隔離",
     body: (
       <>
-        GitHubのダークモードCSSやGmailのリセットスタイルが拡張機能のUIを破壊しないよう、<code>element.attachShadow(&#123; mode: 'closed' &#125;)</code> を使用。ページのスタイルに一切影響されず、ページ側へもスタイル汚染を起こしません。
+        ページの CSS が翻訳カードの表示に干渉しにくいよう、<code>element.attachShadow(&#123; mode: 'closed' &#125;)</code> の中に描画します。拡張機能側のスタイルもページへ漏れません。
       </>
     ),
     code: <>attachShadow(&#123; mode: "closed" &#125;)</>
@@ -41,13 +41,13 @@ const SECURITY_POINTS = [
     icon: Mail,
     titleClassName: "text-blue-400",
     codeClassName: "text-blue-300",
-    title: "4. all_frames & 動的再注入フォールバック",
+    title: "4. 必要なときだけ注入（activeTab）",
     body: (
       <>
-        Gmailのメール本文iframeにもスクリプトが展開されるよう <code>all_frames: true</code> を指定。GitHubのPJAX遷移で接続が切れた場合も、Service Workerが自動で再注入（Scripting Fallback）を行ってからメッセージを再送します。
+        全サイトへの常時注入はせず、右クリック・ショートカット・ポップアップの操作時だけ <code>activeTab</code> と <code>scripting</code> で上位フレームに注入します。SPA 遷移後も操作のたびに注入状態を確認します。
       </>
     ),
-    code: <>chrome.scripting.executeScript() &rarr; Retry send</>
+    code: <>activeTab &rarr; chrome.scripting.executeScript()</>
   }
 ];
 
@@ -57,10 +57,10 @@ export default function SecurityTab() {
       <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
         <h2 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
           <ShieldCheck className="w-5 h-5 text-cyan-400" />
-          <span>ユーザーAPIキーのセキュア保管 ＆ Gmail・GitHub環境対策</span>
+          <span>プライバシーと権限の考え方</span>
         </h2>
         <p className="text-sm text-slate-400 leading-relaxed">
-          エンドユーザーが自身のAIキーを安心して利用できるよう、端末内暗号化とゼロ・トラスト通信を徹底。さらに、CSPやiframeの制約を受ける特殊なWeb環境でも確実に動く設計を採用しています。
+          開発者はサーバーを運営せず、ユーザーのデータを収集しません。権限は必要な操作のときだけ使い、AI 事業者への接続はキーを登録したときにだけ許可を求めます。
         </p>
       </div>
 

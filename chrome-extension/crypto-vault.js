@@ -1,10 +1,15 @@
 /**
- * QuickLens - Secure Local Cryptographic Vault
- * Web Crypto API (AES-GCM 256bit) を利用し、ユーザーのAPIキーを暗号化してローカル保存するユーティリティ
- * サーバー不要・ユーザー登録不要・端末内完結
+ * QuickLens - Local API key storage
+ * Stores the user's own API keys in chrome.storage.local (this device only, never synced),
+ * encrypted with AES-GCM using a key derived from a random per-install salt and the extension ID.
+ *
+ * Note: the derivation inputs live on the same device, so this is closer to obfuscation than to
+ * strong protection against someone with access to this browser profile. What it does guarantee:
+ * keys stay on this device and are only sent to the provider they belong to. The developer runs
+ * no server and never receives them.
  */
 
-const VAULT_CONFIG = self.QUICKLENS_CONFIG.VAULT;
+const VAULT_CONFIG = globalThis.QUICKLENS_CONFIG.VAULT;
 const VAULT_STORAGE_KEY = VAULT_CONFIG.STORAGE_KEY;
 const DEVICE_SALT_KEY = VAULT_CONFIG.DEVICE_SALT_KEY;
 
@@ -22,7 +27,7 @@ async function getOrCreateDeviceSalt() {
 // 端末固有のマスターキーを導出
 async function deriveVaultKey() {
   const salt = await getOrCreateDeviceSalt();
-  // Chrome拡張機能固有のIDと拡張スコープに基づく安全なシード
+  // 拡張機能 ID と端末ごとのソルトから鍵を導出（同じ端末内の情報なので、難読化に近い仕組みです）
   const extensionId = chrome.runtime.id || VAULT_CONFIG.FALLBACK_EXTENSION_ID;
   const enc = new TextEncoder();
   const keyMaterial = await crypto.subtle.importKey(
@@ -115,14 +120,16 @@ async function getDecryptedApiKey(provider) {
 
 /**
  * 鍵が登録されているかどうかの状態のみを取得（平文は返さない）
+ * @returns {Promise<{gemini: boolean, openai: boolean, deepl: boolean}>}
  */
 async function getApiKeyStatus() {
   const existing = await getEncryptedVault();
-  return {
-    hasGeminiKey: Boolean(existing.gemini && existing.gemini.ciphertext),
-    hasOpenaiKey: Boolean(existing.openai && existing.openai.ciphertext),
-    hasDeeplKey: Boolean(existing.deepl && existing.deepl.ciphertext)
-  };
+  const has = (p) => Boolean(existing[p] && existing[p].ciphertext);
+  return { gemini: has("gemini"), openai: has("openai"), deepl: has("deepl") };
+}
+
+async function removeApiKey(provider) {
+  await saveEncryptedApiKey(provider, "");
 }
 
 async function getEncryptedVault() {
@@ -130,11 +137,10 @@ async function getEncryptedVault() {
   return result[VAULT_STORAGE_KEY] || {};
 }
 
-// Service worker / browser export
-if (typeof self !== "undefined") {
-  self.VaultCrypto = {
-    saveEncryptedApiKey,
-    getDecryptedApiKey,
-    getApiKeyStatus
-  };
-}
+// Service worker / extension page export
+globalThis.VaultCrypto = Object.freeze({
+  saveEncryptedApiKey,
+  getDecryptedApiKey,
+  getApiKeyStatus,
+  removeApiKey
+});
